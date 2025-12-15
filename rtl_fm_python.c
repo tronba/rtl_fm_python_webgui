@@ -94,6 +94,15 @@ void no_exit_sanity_checks(void)
 
 }
 
+void  lib_process_args_and_go(int argc, char **argv)
+{
+	lib_process_args(argc, argv);
+	lib_input_open();
+	lib_output_open();
+	lib_go();
+}
+
+
 
 
 void  lib_process_args(int argc, char **argv)
