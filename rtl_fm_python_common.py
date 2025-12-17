@@ -38,13 +38,14 @@ set_demod_raw 	= fm.lib_set_demod_raw
 set_frequency 	= lambda f 	: fm.lib_set_frequency(ctypes.c_uint32(f))
 set_squelch 	= lambda l 	: fm.lib_set_squelch_level(ctypes.c_int(l))
 get_demod	= lambda 	: chr(fm.lib_get_demod_mode())
-str_to_freq	= fm.lib_frequency_convert
+str_to_freq	= lambda  f : fm.lib_frequency_convert(x.encode('utf-8'))
 
 def process_args(l):
 	c=len(l)+1
 	argc=ctypes.c_int(c)
 	argv_var=ctypes.c_char_p *c
 	argu = ['rtl_fm'] + l
+	argu = [x.encode('ascii') for x in argu]
 	argv=argv_var(*argu)
 	return (argc,argv)
 
@@ -109,10 +110,7 @@ def rtl_fm(args=["--help"]):
 
 def rtl_fm_setup_and_go(args):
 	fm.lib_init_first()
-	fm.lib_process_args(*process_args(args))
-	fm.lib_input_open()
-	fm.lib_output_open()
-	fm.lib_go()
+	fm.lib_process_args_and_go(*process_args(args))
 
 def rtl_fm_loop():
 	fm.lib_loop()

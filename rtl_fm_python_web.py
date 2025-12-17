@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # rtl-sdr, turns your Realtek RTL2832 based DVB dongle into a SDR receiver
 # Copyright (C) 2012 by Steve Markgraf <steve@steve-m.de>
 # Copyright (C) 2012 by Hoernchen <la@tfc-server.de>
