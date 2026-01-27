@@ -36,16 +36,21 @@ def start_audio_stream():
 	# Start FFmpeg to convert raw S16_LE PCM to MP3
 	# Input: 32kHz, 16-bit signed little-endian, mono
 	# Output: MP3 stream
-	ffmpeg_process = subprocess.Popen([
-		'ffmpeg',
-		'-f', 's16le',           # Input format
-		'-ar', '32000',          # Sample rate
-		'-ac', '1',              # Mono
-		'-i', 'pipe:0',          # Read from stdin
-		'-f', 'mp3',             # Output format
-		'-b:a', '128k',          # Bitrate
-		'-',                     # Output to stdout
-	], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+	try:
+		ffmpeg_process = subprocess.Popen([
+			'ffmpeg',
+			'-f', 's16le',           # Input format
+			'-ar', '32000',          # Sample rate
+			'-ac', '1',              # Mono
+			'-i', 'pipe:0',          # Read from stdin
+			'-f', 'mp3',             # Output format
+			'-b:a', '128k',          # Bitrate
+			'-',                     # Output to stdout
+		], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+	except FileNotFoundError:
+		print("ERROR: FFmpeg not found. Please install it:", file=sys.stderr)
+		print("  sudo apt-get install ffmpeg", file=sys.stderr)
+		sys.exit(1)
 	
 	# Thread to read from FFmpeg and put in queue
 	def ffmpeg_reader():
@@ -142,7 +147,12 @@ def stream_audio():
 		except queue.Empty:
 			pass
 	
-	return Response(generate(), mimetype='audio/mpeg')
+	response = Response(generate(), mimetype='audio/mpeg')
+	response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+	response.headers['Pragma'] = 'no-cache'
+	response.headers['Expires'] = '0'
+	response.headers['X-Content-Type-Options'] = 'nosniff'
+	return response
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0',port=10100)
