@@ -53,11 +53,17 @@ var FrequencyDisplay = React.createClass({
 });
 
 var AutoGainEnabled = React.createClass({
-	handleSubmit: function(){
-		var autogain=this.refs.autogain.getDOMNode().value.trim();
-		if (autogain=='on'){
+	handleSubmit: function(e){
+		var checked = e.target.checked;
+		if (checked){
 			$.ajax({
 				url: '/gain/auto',
+				dataType: 'json'
+			});
+		} else {
+			// Turn off auto gain by setting a manual gain value
+			$.ajax({
+				url: '/gain/' + this.props.currentGain,
 				dataType: 'json'
 			});
 		}
@@ -65,7 +71,7 @@ var AutoGainEnabled = React.createClass({
 	render:	function(){
 		return (
 			<form className="AutoGainOption">
-			<input type="checkbox" onClick={this.handleSubmit} checked={this.props.autogain} ref="autogain" />
+			<input type="checkbox" onChange={this.handleSubmit} checked={this.props.autogain} ref="autogain" />
 			Auto
 			</form>
 		)
@@ -169,7 +175,7 @@ var State = React.createClass({
     	    <FrequencyForm freq={this.state.data.freq_s} />
     	    <ModulationOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
-    	    <AutoGainEnabled autogain={this.state.data.autogain} />
+    	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} />
     	    </div>
     );
   }
