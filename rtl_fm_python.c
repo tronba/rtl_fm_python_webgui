@@ -280,6 +280,7 @@ void lib_go()
 	}
 	if (dongle.gain == AUTO_GAIN) {
 		verbose_auto_gain(dongle.dev);
+		dongle.gain = AUTO_GAIN;  // Ensure it stays -100 for get_auto_gain() check
 	} else {
 		dongle.gain = nearest_gain(dongle.dev, dongle.gain);
 		verbose_gain_set(dongle.dev, dongle.gain);
