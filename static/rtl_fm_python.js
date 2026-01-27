@@ -37,7 +37,8 @@ var FrequencyForm = React.createClass({
 	render: function(){
 		return(
 			<form className="FrequencyForm" onSubmit={this.handleSubmit}>
-				<input type="text" placeholder={this.props.freq} ref="freq" />
+				<input type="text" value={this.props.freq} ref="freq" />
+				<button type="submit">Set</button>
 			</form>
 		);
 	}
@@ -53,17 +54,9 @@ var FrequencyDisplay = React.createClass({
 });
 
 var FrequencyScanButtons = React.createClass({
-	handleDown: function(){
+	adjustFreq: function(deltaMHz){
 		var currentFreq = this.props.freq_i;
-		var newFreq = currentFreq - 500000; // 0.5 MHz in Hz
-		$.ajax({
-			url: '/frequency/' + newFreq,
-			dataType: 'json'
-		});
-	},
-	handleUp: function(){
-		var currentFreq = this.props.freq_i;
-		var newFreq = currentFreq + 500000; // 0.5 MHz in Hz
+		var newFreq = currentFreq + (deltaMHz * 1000000);
 		$.ajax({
 			url: '/frequency/' + newFreq,
 			dataType: 'json'
@@ -72,8 +65,14 @@ var FrequencyScanButtons = React.createClass({
 	render: function(){
 		return (
 			<div>
-				<button onClick={this.handleDown}>-0.5 MHz</button>
-				<button onClick={this.handleUp}>+0.5 MHz</button>
+				<button onClick={this.adjustFreq.bind(this, -5)}>-5</button>
+				<button onClick={this.adjustFreq.bind(this, -1)}>-1</button>
+				<button onClick={this.adjustFreq.bind(this, -0.5)}>-0.5</button>
+				<button onClick={this.adjustFreq.bind(this, -0.1)}>-0.1</button>
+				<button onClick={this.adjustFreq.bind(this, 0.1)}>+0.1</button>
+				<button onClick={this.adjustFreq.bind(this, 0.5)}>+0.5</button>
+				<button onClick={this.adjustFreq.bind(this, 1)}>+1</button>
+				<button onClick={this.adjustFreq.bind(this, 5)}>+5</button>
 			</div>
 		)
 	}
