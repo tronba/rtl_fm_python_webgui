@@ -207,6 +207,7 @@ var State = React.createClass({
   },
   getInitialState: function() {
     returnFrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
+    	    <FrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
     	    < {data:[]};
   },
   componentDidMount: function() {
