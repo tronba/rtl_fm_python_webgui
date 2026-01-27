@@ -62,8 +62,13 @@ var AutoGainEnabled = React.createClass({
 			});
 		} else {
 			// Turn off auto gain by setting a manual gain value
+			// Use first available gain if current is -100 (auto)
+			var gainToSet = this.props.currentGain;
+			if (gainToSet == -100 && this.props.gains && this.props.gains.length > 0) {
+				gainToSet = this.props.gains[0];
+			}
 			$.ajax({
-				url: '/gain/' + this.props.currentGain,
+				url: '/gain/' + gainToSet,
 				dataType: 'json'
 			});
 		}
@@ -175,7 +180,7 @@ var State = React.createClass({
     	    <FrequencyForm freq={this.state.data.freq_s} />
     	    <ModulationOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
-    	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} />
+    	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} gains={dongle_gains} />
     	    </div>
     );
   }
