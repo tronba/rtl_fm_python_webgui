@@ -52,6 +52,33 @@ var FrequencyDisplay = React.createClass({
 	}
 });
 
+var FrequencyScanButtons = React.createClass({
+	handleDown: function(){
+		var currentFreq = this.props.freq_i;
+		var newFreq = currentFreq - 500000; // 0.5 MHz in Hz
+		$.ajax({
+			url: '/frequency/' + newFreq,
+			dataType: 'json'
+		});
+	},
+	handleUp: function(){
+		var currentFreq = this.props.freq_i;
+		var newFreq = currentFreq + 500000; // 0.5 MHz in Hz
+		$.ajax({
+			url: '/frequency/' + newFreq,
+			dataType: 'json'
+		});
+	},
+	render: function(){
+		return (
+			<div>
+				<button onClick={this.handleDown}>-0.5 MHz</button>
+				<button onClick={this.handleUp}>+0.5 MHz</button>
+			</div>
+		)
+	}
+});
+
 var AutoGainEnabled = React.createClass({
 	handleSubmit: function(e){
 		var checked = e.target.checked;
@@ -150,7 +177,8 @@ var State = React.createClass({
       error: function(xhr, status, err) {
         console.error("/state", status, err.toString());
       }.bind(this)
-    });
+    });ScanButtons freq_i={this.state.data.freq_i} />
+    	    <Frequency
   },
   refreshGainList : function(){
   $.ajax({
