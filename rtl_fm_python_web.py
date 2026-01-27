@@ -81,11 +81,6 @@ def start_audio_stream():
 start_audio_stream()
 make_rtl_fm_thread(block=False)
 
-# Wait a moment for rtl_fm to initialize, then enable auto gain
-import time
-time.sleep(2)
-set_auto_gain()
-
 app = Flask(__name__)
 
 @app.route('/')
