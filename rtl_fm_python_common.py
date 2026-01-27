@@ -25,8 +25,8 @@ from threading import Thread
 
 printstderr = lambda x : print(x,file=sys.stderr)
 
-# Track actual auto gain state
-_auto_gain_enabled = False
+# Track actual auto gain state - starts True because rtl_fm enables auto gain by default
+_auto_gain_enabled = True
 
 # Global reference to FFmpeg process for audio streaming
 _ffmpeg_stdin = None
