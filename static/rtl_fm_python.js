@@ -64,7 +64,8 @@ var FrequencyScanButtons = React.createClass({
 		});
 	},
 	render: function(){
-		retur style={{display: 'inline-block'}}>
+		return (
+			<div style={{display: 'inline-block'}}>
 				<button onClick={this.adjustFreq.bind(this, -5)}>-5</button>
 				<button onClick={this.adjustFreq.bind(this, -1)}>-1</button>
 				<button onClick={this.adjustFreq.bind(this, -0.5)}>-0.5</button>
@@ -86,7 +87,6 @@ var FrequencyScanButtonsRight = React.createClass({
 	render: function(){
 		return (
 			<div style={{display: 'inline-block'}}>
-				<button onClick={this.adjustFreq.bind(this, -0.1)}>-0.1</button>
 				<button onClick={this.adjustFreq.bind(this, 0.1)}>+0.1</button>
 				<button onClick={this.adjustFreq.bind(this, 0.5)}>+0.5</button>
 				<button onClick={this.adjustFreq.bind(this, 1)}>+1</button>
@@ -207,9 +207,7 @@ var State = React.createClass({
   },
   getInitialState: function() {
     returnFrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
-    	    <FrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
-    	    < {data:[]};
-  },
+    	    <
   componentDidMount: function() {
     this.interval = setInterval(this.refreshData, 500);
     this.refreshGainList();
@@ -227,6 +225,7 @@ var State = React.createClass({
     	    <FrequencyForm freq={this.state.data.freq_s} />
     	    <ModulationOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
+    	    <FrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
     	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} gains={dongle_gains} />
     	    </div>
     );
