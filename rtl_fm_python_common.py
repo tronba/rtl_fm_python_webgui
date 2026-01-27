@@ -49,7 +49,7 @@ set_demod_raw 	= fm.lib_set_demod_raw
 set_frequency 	= lambda f 	: fm.lib_set_frequency(ctypes.c_uint32(f))
 set_squelch 	= lambda l 	: fm.lib_set_squelch_level(ctypes.c_int(l))
 get_demod	= lambda 	: chr(fm.lib_get_demod_mode())
-str_to_freq	= lambda  f : fm.lib_frequency_convert(x.encode('utf-8'))
+str_to_freq	= lambda  f : fm.lib_frequency_convert(f.encode('utf-8'))
 
 def process_args(l):
 	c=len(l)+1
