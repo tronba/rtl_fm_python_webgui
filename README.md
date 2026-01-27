@@ -37,12 +37,36 @@ GPLv2
 
 # How to Build
 
-- Install the RTL-SDR software 
-- Install Python dependencies for Flask
+## System Requirements
+
+- RTL-SDR software and drivers
+- Python 3.x
+- FFmpeg (for audio streaming to browser)
+- GCC and build tools
+
+## Installation Steps
+
+### 1. Install RTL-SDR software
+
+On Debian/Ubuntu/Raspberry Pi OS:
+
+    sudo apt-get install rtl-sdr librtlsdr-dev
+
+### 2. Install FFmpeg
+
+    sudo apt-get install ffmpeg
+
+### 3. Install Python dependencies
+
+    sudo pip install -r requirements.txt
+
+Or manually:
 
     sudo pip install flask
 
-- Compile and link the modified rtm_fm source rtl_fm_python.c
+### 4. Compile rtl_fm_python
+
+Compile and link the modified rtl_fm source:
 
     ./build.sh
 
@@ -57,15 +81,35 @@ with building C applications.
 
 # How to Run
 
-## Web Interface & API
+## Web Interface & API with Audio Streaming
 
-Use the script *rtl_fm_python_web.py* as a replacement for *rtl_fm*. If you need to change the
-port or the host, that is available at the end of the file.
+Use the script *rtl_fm_python_web.py* as a replacement for *rtl_fm*. The audio will be streamed as MP3 to your browser instead of playing through local speakers.
 
-Included is a script called *start_web.sh* that shows an example usage. This script tunes to a
-broadcast FM station and pipes the audio to Pulse Audio.
+**Requirements:**
+- FFmpeg must be installed and available in PATH
 
-By default the application should be running at http://127.0.0.1:10100/
+**Running:**
+
+    ./rtl_fm_python_web.py -M wbfm -f 101.1M -
+
+Or use the included script:
+
+    ./start_web_stream.sh
+
+By default the application runs at http://127.0.0.1:10100/
+
+The web interface includes:
+- Live audio streaming (MP3 format, plays in browser)
+- Frequency control
+- Modulation switching
+- Gain control
+- Signal strength meter
+
+**Legacy (local speaker output):**
+
+If you want to pipe audio to local speakers instead of streaming to browser, use:
+
+    ./rtl_fm_python_web.py -M wbfm -f 101.1M - |aplay -r 32000 -f S16_LE -t raw -c 1
 
 ## Python interactive mode
 
@@ -163,6 +207,14 @@ This call turns off automatic gain.
 ## /gain/auto
 
 Sets the device to be in auto gain mode. The gain may read -100 in the above state call.
+
+## /stream.mp3
+
+Streams live demodulated audio as MP3. Use in an HTML5 audio element:
+
+    <audio controls autoplay>
+        <source src="/stream.mp3" type="audio/mpeg">
+    </audio>
 
 # Python Functions
 

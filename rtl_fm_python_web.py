@@ -19,9 +19,61 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, jsonify, url_for, redirect
+from flask import Flask, jsonify, url_for, redirect, Response
 from rtl_fm_python_thread import *
+from rtl_fm_python_common import set_audio_output
+import subprocess
+import threading
+import queue
 
+# Audio streaming setup
+audio_queue = queue.Queue(maxsize=100)
+ffmpeg_process = None
+
+def start_audio_stream():
+	"""Start FFmpeg process to convert raw audio to MP3"""
+	global ffmpeg_process
+	# Start FFmpeg to convert raw S16_LE PCM to MP3
+	# Input: 32kHz, 16-bit signed little-endian, mono
+	# Output: MP3 stream
+	ffmpeg_process = subprocess.Popen([
+		'ffmpeg',
+		'-f', 's16le',           # Input format
+		'-ar', '32000',          # Sample rate
+		'-ac', '1',              # Mono
+		'-i', 'pipe:0',          # Read from stdin
+		'-f', 'mp3',             # Output format
+		'-b:a', '128k',          # Bitrate
+		'-',                     # Output to stdout
+	], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+	
+	# Thread to read from FFmpeg and put in queue
+	def ffmpeg_reader():
+		try:
+			while True:
+				chunk = ffmpeg_process.stdout.read(4096)
+				if not chunk:
+					break
+				try:
+					audio_queue.put(chunk, block=False)
+				except queue.Full:
+					# Drop old data if queue is full
+					try:
+						audio_queue.get_nowait()
+						audio_queue.put(chunk, block=False)
+					except:
+						pass
+		except:
+			pass
+	
+	reader_thread = threading.Thread(target=ffmpeg_reader, daemon=True)
+	reader_thread.start()
+	
+	# Redirect rtl_fm audio output to FFmpeg
+	set_audio_output(ffmpeg_process.stdin)
+
+# Start audio streaming before RTL_FM thread
+start_audio_stream()
 make_rtl_fm_thread(block=False)
 
 app = Flask(__name__)
@@ -78,6 +130,19 @@ def web_set_auto_gain():
 def web_get_gain_list():
 	l=get_gains()
 	return jsonify({'gains':l})
+
+@app.route('/stream.mp3')
+def stream_audio():
+	"""Stream MP3 audio to browser"""
+	def generate():
+		try:
+			while True:
+				chunk = audio_queue.get(timeout=5.0)
+				yield chunk
+		except queue.Empty:
+			pass
+	
+	return Response(generate(), mimetype='audio/mpeg')
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0',port=10100)

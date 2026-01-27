@@ -19,11 +19,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import ctypes, sys
+import ctypes, sys, os
 from time import sleep
 from threading import Thread
 
 printstderr = lambda x : print(x,file=sys.stderr)
+
+# Global reference to FFmpeg process for audio streaming
+_ffmpeg_stdin = None
+
+def set_audio_output(ffmpeg_stdin):
+	"""Redirect stdout to FFmpeg stdin for audio streaming"""
+	global _ffmpeg_stdin
+	_ffmpeg_stdin = ffmpeg_stdin
+	if ffmpeg_stdin is not None:
+		# Redirect stdout to FFmpeg stdin
+		os.dup2(ffmpeg_stdin.fileno(), sys.stdout.fileno())
 
 
 fm  = ctypes.CDLL('./rtl_fm_python.so')

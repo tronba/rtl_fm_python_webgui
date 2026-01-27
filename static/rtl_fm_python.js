@@ -25,7 +25,8 @@ var SignalMeter = React.createClass({
 });
 
 var FrequencyForm = React.createClass({
-	handleSubmit: function(){
+	handleSubmit: function(e){
+		e.preventDefault();
 		var freq=this.refs.freq.getDOMNode().value.trim();
 		$.ajax({
 			url: '/frequency/human/' + freq,
