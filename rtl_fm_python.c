@@ -414,14 +414,11 @@ void lib_set_real_gain(int g){
 }
 
 int lib_get_tuner_gains_count(){
-	int count,r;
-	rtlsdr_set_tuner_gain_mode(dongle.dev, 1);
 	return rtlsdr_get_tuner_gains(dongle.dev, NULL);
 }
 
 void lib_get_tuner_gains(int *gains){
-	int count,r;
-	r = rtlsdr_set_tuner_gain_mode(dongle.dev, 1);
+	int count;
 	count = rtlsdr_get_tuner_gains(dongle.dev, gains);
 }
 
