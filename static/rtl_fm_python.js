@@ -37,8 +37,9 @@ var FrequencyForm = React.createClass({
 	render: function(){
 		return(
 			<form className="FrequencyForm" onSubmit={this.handleSubmit}>
-				<input type="text" value={this.props.freq} ref="freq" />
-				<button type="submit">Set</button>
+				<input type="text" value={this.props.freq} ref="freq" style={{width: '80px'}} />
+				<br />
+				<button type="submit" style={{width: '100px', marginTop: '5px'}}>Set Frequency</button>
 			</form>
 		);
 	}
@@ -63,11 +64,28 @@ var FrequencyScanButtons = React.createClass({
 		});
 	},
 	render: function(){
-		return (
-			<div>
+		retur style={{display: 'inline-block'}}>
 				<button onClick={this.adjustFreq.bind(this, -5)}>-5</button>
 				<button onClick={this.adjustFreq.bind(this, -1)}>-1</button>
 				<button onClick={this.adjustFreq.bind(this, -0.5)}>-0.5</button>
+				<button onClick={this.adjustFreq.bind(this, -0.1)}>-0.1</button>
+			</div>
+		)
+	}
+});
+
+var FrequencyScanButtonsRight = React.createClass({
+	adjustFreq: function(deltaMHz){
+		var currentFreq = this.props.freq_i;
+		var newFreq = currentFreq + (deltaMHz * 1000000);
+		$.ajax({
+			url: '/frequency/' + newFreq,
+			dataType: 'json'
+		});
+	},
+	render: function(){
+		return (
+			<div style={{display: 'inline-block'}}>
 				<button onClick={this.adjustFreq.bind(this, -0.1)}>-0.1</button>
 				<button onClick={this.adjustFreq.bind(this, 0.1)}>+0.1</button>
 				<button onClick={this.adjustFreq.bind(this, 0.5)}>+0.5</button>
@@ -188,7 +206,8 @@ var State = React.createClass({
     });
   },
   getInitialState: function() {
-    return {data:[]};
+    returnFrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
+    	    < {data:[]};
   },
   componentDidMount: function() {
     this.interval = setInterval(this.refreshData, 500);
