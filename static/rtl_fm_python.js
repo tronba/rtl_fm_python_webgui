@@ -43,8 +43,7 @@ var FrequencyForm = React.createClass({
 			</form>
 		);
 	}
-}
-);
+});
 
 var FrequencyDisplay = React.createClass({
 	render: function(){
@@ -105,8 +104,6 @@ var AutoGainEnabled = React.createClass({
 				dataType: 'json'
 			});
 		} else {
-			// Turn off auto gain by setting a manual gain value
-			// Use first available gain if current is -100 (auto)
 			var gainToSet = this.props.currentGain;
 			if (gainToSet == -100 && this.props.gains && this.props.gains.length > 0) {
 				gainToSet = this.props.gains[0];
@@ -206,8 +203,8 @@ var State = React.createClass({
     });
   },
   getInitialState: function() {
-    returnFrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
-    	    <
+    return {data:[]};
+  },
   componentDidMount: function() {
     this.interval = setInterval(this.refreshData, 500);
     this.refreshGainList();
@@ -223,9 +220,9 @@ var State = React.createClass({
     	    <br />
     	    <FrequencyScanButtons freq_i={this.state.data.freq_i} />
     	    <FrequencyForm freq={this.state.data.freq_s} />
+    	    <FrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
     	    <ModulationOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
-    	    <FrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
     	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} gains={dongle_gains} />
     	    </div>
     );
