@@ -177,8 +177,7 @@ var State = React.createClass({
       error: function(xhr, status, err) {
         console.error("/state", status, err.toString());
       }.bind(this)
-    });ScanButtons freq_i={this.state.data.freq_i} />
-    	    <Frequency
+    });
   },
   refreshGainList : function(){
   $.ajax({
@@ -206,7 +205,8 @@ var State = React.createClass({
     	    <SignalMeter signal={this.state.data.s_level} />
     	    <br />
     	    <FrequencyForm freq={this.state.data.freq_s} />
-    	    <ModulationOption mod={this.state.data.mod} />
+    	    <ModulatioScanButtons freq_i={this.state.data.freq_i} />
+    	    <FrequencynOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
     	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} gains={dongle_gains} />
     	    </div>
