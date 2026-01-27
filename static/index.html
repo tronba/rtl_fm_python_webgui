@@ -4,10 +4,17 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/react.min.js"></script>
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/JSXTransformer.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<style>
+audio::-webkit-media-controls-timeline,
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+  display: none;
+}
+</style>
 </head>
 <body>
 <h2>Live Audio Stream</h2>
-<audio controls autoplay preload="none">
+<audio controls autoplay preload="none" id="audioPlayer">
 <source src="/stream.mp3" type="audio/mpeg">
 Your browser does not support the audio element.
 </audio>

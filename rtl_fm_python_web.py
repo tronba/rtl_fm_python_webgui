@@ -81,11 +81,6 @@ def start_audio_stream():
 start_audio_stream()
 make_rtl_fm_thread(block=False)
 
-# Queue auto gain to be enabled after rtl_fm initializes
-# The queue is processed by the rtl_fm_thread after device is ready
-from rtl_fm_python_thread import queue
-queue.append(set_auto_gain)
-
 app = Flask(__name__)
 
 @app.route('/')

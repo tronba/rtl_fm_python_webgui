@@ -25,6 +25,9 @@ from threading import Thread
 
 printstderr = lambda x : print(x,file=sys.stderr)
 
+# Track actual auto gain state
+_auto_gain_enabled = False
+
 # Global reference to FFmpeg process for audio streaming
 _ffmpeg_stdin = None
 
@@ -106,13 +109,22 @@ def get_gain():
 	return fm.lib_get_gain()
 
 def get_auto_gain():
-	return get_gain()==-100
+	return _auto_gain_enabled
 
 def set_gain_human(g):
+	global _auto_gain_enabled
+	_auto_gain_enabled = False
 	fm.lib_set_gain(g)
 
 def set_auto_gain():
+	global _auto_gain_enabled
+	_auto_gain_enabled = True
 	fm.lib_set_auto_gain()
+
+def set_gain(g):
+	global _auto_gain_enabled
+	_auto_gain_enabled = False
+	fm.lib_set_real_gain(g)
 
 
 
