@@ -204,9 +204,9 @@ var State = React.createClass({
     	    <FrequencyDisplay freq={this.state.data.freq_s} />
     	    <SignalMeter signal={this.state.data.s_level} />
     	    <br />
+    	    <FrequencyScanButtons freq_i={this.state.data.freq_i} />
     	    <FrequencyForm freq={this.state.data.freq_s} />
-    	    <ModulatioScanButtons freq_i={this.state.data.freq_i} />
-    	    <FrequencynOption mod={this.state.data.mod} />
+    	    <ModulationOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
     	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} gains={dongle_gains} />
     	    </div>
