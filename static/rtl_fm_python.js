@@ -24,10 +24,18 @@ var SignalMeter = React.createClass({
 	}
 });
 
-var FrequencyForm = React.createClass({
+var FrequencyInput = React.createClass({
+	render: function(){
+		return(
+			<input type="text" value={this.props.freq} style={{width: '80px', display: 'inline-block'}} id="freqInput" />
+		);
+	}
+});
+
+var FrequencySetButton = React.createClass({
 	handleSubmit: function(e){
 		e.preventDefault();
-		var freq=this.refs.freq.getDOMNode().value.trim();
+		var freq=document.getElementById('freqInput').value.trim();
 		$.ajax({
 			url: '/frequency/human/' + freq,
 			dataType: 'json'		
@@ -36,11 +44,7 @@ var FrequencyForm = React.createClass({
 	},
 	render: function(){
 		return(
-			<form className="FrequencyForm" onSubmit={this.handleSubmit}>
-				<input type="text" value={this.props.freq} ref="freq" style={{width: '80px'}} />
-				<br />
-				<button type="submit" style={{width: '100px', marginTop: '5px'}}>Set Frequency</button>
-			</form>
+			<button onClick={this.handleSubmit} style={{width: '100px'}}>Set Frequency</button>
 		);
 	}
 });
@@ -219,8 +223,10 @@ var State = React.createClass({
     	    <SignalMeter signal={this.state.data.s_level} />
     	    <br />
     	    <FrequencyScanButtons freq_i={this.state.data.freq_i} />
-    	    <FrequencyForm freq={this.state.data.freq_s} />
+    	    <FrequencyInput freq={this.state.data.freq_s} />
     	    <FrequencyScanButtonsRight freq_i={this.state.data.freq_i} />
+    	    <br />
+    	    <FrequencySetButton />
     	    <ModulationOption mod={this.state.data.mod} />
     	    <GainOptions gains={dongle_gains} gain={this.state.data.gain} autogain={this.state.data.autogain} />
     	    <AutoGainEnabled autogain={this.state.data.autogain} currentGain={this.state.data.gain} gains={dongle_gains} />
