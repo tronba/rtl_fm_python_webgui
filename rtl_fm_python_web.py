@@ -21,7 +21,7 @@
 
 from flask import Flask, jsonify, url_for, redirect, Response
 from rtl_fm_python_thread import *
-from rtl_fm_python_common import set_audio_output
+from rtl_fm_python_common import set_audio_output, get_squelch, set_squelch
 import subprocess
 import threading
 import queue
@@ -96,7 +96,8 @@ def web_state():
 			'freq_i' 	: get_frequency(),
 			'mod'		: get_demod(),
 			'gain'		: get_gain(),
-			'autogain'	: get_auto_gain()
+			'autogain'	: get_auto_gain(),
+			'squelch'	: get_squelch()
 		})
 
 @app.route('/frequency/<int:f>')
@@ -129,6 +130,11 @@ def web_set_gain_human(g):
 @app.route('/gain/auto')
 def web_set_auto_gain():
 	set_auto_gain()
+	return web_state()
+
+@app.route('/squelch/<int:level>')
+def web_set_squelch(level):
+	set_squelch(level)
 	return web_state()
 
 @app.route('/gain/list')

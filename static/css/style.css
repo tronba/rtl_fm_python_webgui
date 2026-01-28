@@ -244,6 +244,69 @@ body {
 	cursor: pointer;
 }
 
+/* Squelch Slider */
+.squelch-group {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--bg-secondary);
+}
+
+.squelch-group label {
+	display: block;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--text-secondary);
+	margin-bottom: 8px;
+}
+
+.squelch-control {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.squelch-control input[type="range"] {
+	flex: 1;
+	height: 8px;
+	-webkit-appearance: none;
+	appearance: none;
+	background: var(--bg-secondary);
+	border-radius: 4px;
+	outline: none;
+}
+
+.squelch-control input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	background: var(--accent);
+	border-radius: 50%;
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.squelch-control input[type="range"]::-webkit-slider-thumb:hover {
+	background: var(--accent-hover);
+}
+
+.squelch-control input[type="range"]::-moz-range-thumb {
+	width: 20px;
+	height: 20px;
+	background: var(--accent);
+	border-radius: 50%;
+	cursor: pointer;
+	border: none;
+}
+
+.squelch-value {
+	min-width: 40px;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	color: var(--text-secondary);
+}
+
 /* Presets */
 .presets-grid {
 	display: grid;
@@ -297,24 +360,91 @@ body {
 	right: 0;
 	background: var(--bg-card);
 	border-top: 1px solid var(--bg-secondary);
-	padding: 12px 16px;
-	display: flex;
-	align-items: center;
-	gap: 12px;
+	padding: 16px;
 }
 
 .audio-player audio {
-	flex: 1;
-	height: 40px;
+	display: none; /* Hide native player */
 }
 
-.audio-status {
+.player-controls {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	max-width: 500px;
+	margin: 0 auto;
+}
+
+.player-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: 8px;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	padding: 14px 20px;
+	gap: 8px;
+}
+
+.player-btn-play {
+	flex: 1;
+	background: var(--accent);
+	color: white;
+}
+
+.player-btn-play:hover, .player-btn-play:active {
+	background: var(--accent-hover);
+}
+
+.player-btn-play.playing {
+	background: var(--danger);
+}
+
+.player-btn-live {
+	background: var(--bg-secondary);
+	color: var(--text-primary);
+	padding: 14px 16px;
+}
+
+.player-btn-live:hover, .player-btn-live:active {
+	background: var(--success);
+	color: white;
+}
+
+.player-btn-live .live-dot {
+	width: 8px;
+	height: 8px;
+	background: var(--danger);
+	border-radius: 50%;
+	animation: pulse 1.5s ease-in-out infinite;
+}
+
+.player-btn-live:hover .live-dot,
+.player-btn-live:active .live-dot {
+	background: white;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.4; }
+}
+
+.player-status {
 	font-size: 0.75rem;
 	color: var(--text-secondary);
+	text-align: center;
+	margin-top: 8px;
 }
 
-.audio-status.playing {
+.player-status.playing {
 	color: var(--success);
+}
+
+.player-status.error {
+	color: var(--danger);
 }
 
 /* Antenna Guide */

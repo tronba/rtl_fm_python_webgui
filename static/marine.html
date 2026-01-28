@@ -122,9 +122,14 @@
 			<input type="checkbox" id="autogain-check" checked>
 			<label for="autogain-check">Automatisk forsterkning</label>
 		</div>
+		<div class="squelch-group">
+			<label>Squelch (demper støy når ingen sender)</label>
+			<div class="squelch-control">
+				<input type="range" id="squelch-slider" min="0" max="500" value="0">
+				<span class="squelch-value" id="squelch-value">0</span>
+			</div>
+		</div>
 	</div>
-
-	<!-- Info -->
 	<div class="card">
 		<div class="card-title">ℹ️ Om Maritim VHF</div>
 		<p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
@@ -136,10 +141,13 @@
 
 	<!-- Audio Player -->
 	<div class="audio-player">
-		<span class="audio-status" id="audio-status">○ Stoppet</span>
-		<audio controls id="audio-player" preload="none">
+		<div class="player-controls">
+			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start lytting</button>
+			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Direkte</button>
+		</div>
+		<div class="player-status" id="player-status">Trykk Start for å lytte</div>
+		<audio id="audio-player" preload="none">
 			<source src="/stream.mp3" type="audio/mpeg">
-			Nettleseren støtter ikke lydavspilling.
 		</audio>
 	</div>
 

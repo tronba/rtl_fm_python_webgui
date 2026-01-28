@@ -109,10 +109,13 @@
 
 	<!-- Audio Player -->
 	<div class="audio-player">
-		<span class="audio-status" id="audio-status">○ Stoppet</span>
-		<audio controls id="audio-player" preload="none">
+		<div class="player-controls">
+			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start lytting</button>
+			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Direkte</button>
+		</div>
+		<div class="player-status" id="player-status">Trykk Start for å lytte</div>
+		<audio id="audio-player" preload="none">
 			<source src="/stream.mp3" type="audio/mpeg">
-			Nettleseren støtter ikke lydavspilling.
 		</audio>
 	</div>
 

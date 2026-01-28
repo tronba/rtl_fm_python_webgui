@@ -13,7 +13,8 @@
 		s_level: 0,
 		mod: 'w',
 		gain: 0,
-		autogain: true
+		autogain: true,
+		squelch: 0
 	};
 	let gains = [];
 	let pollInterval = null;
@@ -35,7 +36,12 @@
 			gainSelect: document.getElementById('gain-select'),
 			autogainCheck: document.getElementById('autogain-check'),
 			audioPlayer: document.getElementById('audio-player'),
-			audioStatus: document.getElementById('audio-status')
+			squelchSlider: document.getElementById('squelch-slider'),
+			squelchValue: document.getElementById('squelch-value'),
+			// New player elements
+			playBtn: document.getElementById('player-btn-play'),
+			liveBtn: document.getElementById('player-btn-live'),
+			playerStatus: document.getElementById('player-status')
 		};
 
 		// Setup event listeners
@@ -48,11 +54,92 @@
 		// Start polling
 		pollInterval = setInterval(fetchState, 500);
 
-		// Audio player events
-		if (elements.audioPlayer) {
-			elements.audioPlayer.addEventListener('play', () => updateAudioStatus(true));
-			elements.audioPlayer.addEventListener('pause', () => updateAudioStatus(false));
-			elements.audioPlayer.addEventListener('error', () => updateAudioStatus(false));
+		// Setup custom audio player
+		setupAudioPlayer();
+	}
+
+	function setupAudioPlayer() {
+		if (!elements.audioPlayer) return;
+
+		// Play/Stop button
+		if (elements.playBtn) {
+			elements.playBtn.addEventListener('click', togglePlayback);
+		}
+
+		// Live button - reload stream
+		if (elements.liveBtn) {
+			elements.liveBtn.addEventListener('click', goLive);
+		}
+
+		// Audio events
+		elements.audioPlayer.addEventListener('play', () => updatePlayerUI(true));
+		elements.audioPlayer.addEventListener('pause', () => updatePlayerUI(false));
+		elements.audioPlayer.addEventListener('ended', () => updatePlayerUI(false));
+		elements.audioPlayer.addEventListener('error', (e) => {
+			updatePlayerUI(false);
+			showPlayerError();
+		});
+		elements.audioPlayer.addEventListener('waiting', () => showPlayerStatus('Laster...'));
+		elements.audioPlayer.addEventListener('playing', () => showPlayerStatus('Spiller direkte'));
+	}
+
+	function togglePlayback() {
+		if (!elements.audioPlayer) return;
+		
+		if (elements.audioPlayer.paused) {
+			// Start fresh stream
+			goLive();
+		} else {
+			elements.audioPlayer.pause();
+		}
+	}
+
+	function goLive() {
+		if (!elements.audioPlayer) return;
+		
+		// Reload the stream source to get live audio
+		const source = elements.audioPlayer.querySelector('source');
+		if (source) {
+			// Add timestamp to bust cache and force reconnect
+			const baseUrl = '/stream.mp3';
+			source.src = baseUrl + '?t=' + Date.now();
+			elements.audioPlayer.load();
+		}
+		
+		elements.audioPlayer.play().catch(err => {
+			console.error('Playback failed:', err);
+			showPlayerError();
+		});
+	}
+
+	function updatePlayerUI(playing) {
+		if (elements.playBtn) {
+			if (playing) {
+				elements.playBtn.innerHTML = '⏹️ Stopp';
+				elements.playBtn.classList.add('playing');
+			} else {
+				elements.playBtn.innerHTML = '▶️ Start lytting';
+				elements.playBtn.classList.remove('playing');
+			}
+		}
+		
+		if (elements.playerStatus) {
+			elements.playerStatus.textContent = playing ? 'Spiller direkte' : 'Stoppet';
+			elements.playerStatus.classList.toggle('playing', playing);
+			elements.playerStatus.classList.remove('error');
+		}
+	}
+
+	function showPlayerStatus(msg) {
+		if (elements.playerStatus) {
+			elements.playerStatus.textContent = msg;
+		}
+	}
+
+	function showPlayerError() {
+		if (elements.playerStatus) {
+			elements.playerStatus.textContent = 'Feil - trykk Direkte';
+			elements.playerStatus.classList.add('error');
 		}
 	}
 
@@ -117,6 +204,19 @@
 				setFrequencyHuman(freq);
 			});
 		});
+
+		// Squelch slider
+		if (elements.squelchSlider) {
+			elements.squelchSlider.addEventListener('input', () => {
+				// Update display immediately for responsiveness
+				if (elements.squelchValue) {
+					elements.squelchValue.textContent = elements.squelchSlider.value;
+				}
+			});
+			elements.squelchSlider.addEventListener('change', () => {
+				setSquelch(parseInt(elements.squelchSlider.value));
+			});
+		}
 	}
 
 	// API Functions
@@ -190,6 +290,16 @@
 			.catch(err => console.error('Failed to set auto gain:', err));
 	}
 
+	function setSquelch(level) {
+		fetch('/squelch/' + level)
+			.then(res => res.json())
+			.then(data => {
+				state = data;
+				updateUI();
+			})
+			.catch(err => console.error('Failed to set squelch:', err));
+	}
+
 	// UI Update Functions
 	function updateUI() {
 		// Update frequency display
@@ -230,6 +340,14 @@
 			elements.autogainCheck.checked = state.autogain;
 		}
 
+		// Update squelch slider (only if not being dragged)
+		if (elements.squelchSlider && document.activeElement !== elements.squelchSlider) {
+			elements.squelchSlider.value = state.squelch || 0;
+		}
+		if (elements.squelchValue) {
+			elements.squelchValue.textContent = state.squelch || 0;
+		}
+
 		// Update preset buttons active state
 		updatePresetButtons();
 	}
@@ -264,13 +382,6 @@
 		});
 	}
 
-	function updateAudioStatus(playing) {
-		if (elements.audioStatus) {
-			elements.audioStatus.textContent = playing ? '● Spiller' : '○ Stoppet';
-			elements.audioStatus.classList.toggle('playing', playing);
-		}
-	}
-
 	// Helper Functions
 	function adjustFrequency(deltaMHz) {
 		const deltaHz = deltaMHz * 1000000;
@@ -294,7 +405,10 @@
 		adjustFrequency,
 		setDemod,
 		setGain,
-		setAutoGain
+		setAutoGain,
+		setSquelch,
+		togglePlayback,
+		goLive
 	};
 
 })();

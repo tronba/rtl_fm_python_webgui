@@ -322,6 +322,10 @@ void  lib_set_squelch_level(int l) {
 	demod.squelch_level = l;
 }
 
+int lib_get_squelch_level() {
+	return demod.squelch_level;
+}
+
 void  util_set_wbfm_options(){
 	controller.wb_mode = 1;
 	demod.custom_atan = 1;
