@@ -325,16 +325,19 @@
 		const bottomQuarter = sortedBySignal.slice(0, Math.ceil(sortedBySignal.length / 4));
 		const noiseFloor = Math.round(bottomQuarter.reduce((sum, r) => sum + r.signal, 0) / bottomQuarter.length);
 		
-		// Threshold: noise floor + 25%
-		const threshold = Math.round(noiseFloor * 1.25);
-		console.log('Noise floor:', noiseFloor, 'Threshold:', threshold);
+		// Threshold: noise floor + 50% (must be significantly above noise)
+		const threshold = Math.round(noiseFloor * 1.5);
+		const minSnr = 10;  // Minimum signal-to-noise ratio to be considered a station
+		console.log('Noise floor:', noiseFloor, 'Threshold:', threshold, 'Min SNR:', minSnr);
 
-		// Phase 3: Find peaks (local maxima above threshold)
+		// Phase 3: Find peaks (local maxima above threshold AND minimum SNR)
 		const peaks = [];
 		for (let i = 0; i < rawResults.length; i++) {
 			const current = rawResults[i];
+			const snr = current.signal - noiseFloor;
 			
-			if (current.signal < threshold) continue;
+			// Must be above threshold AND have minimum SNR
+			if (current.signal < threshold || snr < minSnr) continue;
 			
 			// Check if local maximum (higher than immediate neighbors)
 			const prev = rawResults[i - 1];
@@ -413,7 +416,7 @@
 		elements.scanResults.querySelectorAll('.scan-result-item').forEach(item => {
 			item.addEventListener('click', () => {
 				const freq = item.dataset.freq;
-				setFrequency(freq);
+				setFrequencyHuman(freq);
 			});
 		});
 	}
