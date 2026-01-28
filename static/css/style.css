@@ -352,6 +352,141 @@ body {
 	color: rgba(255,255,255,0.8);
 }
 
+/* Band Scanner */
+.scanner-controls {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.scan-btn {
+	background: var(--accent);
+	border: none;
+	color: white;
+	padding: 12px 24px;
+	border-radius: 8px;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.scan-btn:hover, .scan-btn:active {
+	background: var(--accent-hover);
+}
+
+.scan-btn:disabled {
+	background: var(--bg-secondary);
+	color: var(--text-secondary);
+	cursor: not-allowed;
+}
+
+.scan-btn.scanning {
+	background: var(--danger);
+}
+
+.scan-status {
+	color: var(--text-secondary);
+	font-size: 0.875rem;
+}
+
+.scan-progress-container {
+	margin-top: 12px;
+	background: var(--bg-secondary);
+	border-radius: 8px;
+	height: 24px;
+	position: relative;
+	overflow: hidden;
+}
+
+.scan-progress-bar {
+	height: 100%;
+	background: linear-gradient(90deg, var(--accent), var(--success));
+	border-radius: 8px;
+	width: 0%;
+	transition: width 0.1s ease;
+}
+
+.scan-progress-text {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.scan-results {
+	margin-top: 16px;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+.scan-result-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px;
+	background: var(--bg-secondary);
+	border-radius: 8px;
+	margin-bottom: 8px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	border: 2px solid transparent;
+}
+
+.scan-result-item:hover, .scan-result-item:active {
+	border-color: var(--accent);
+}
+
+.scan-result-freq {
+	font-size: 1.125rem;
+	font-weight: 600;
+	min-width: 80px;
+}
+
+.scan-result-bar-container {
+	flex: 1;
+	background: var(--bg-primary);
+	border-radius: 4px;
+	height: 8px;
+	overflow: hidden;
+}
+
+.scan-result-bar {
+	height: 100%;
+	border-radius: 4px;
+	transition: width 0.2s ease;
+}
+
+.scan-result-bar.strong {
+	background: var(--success);
+}
+
+.scan-result-bar.medium {
+	background: var(--warning);
+}
+
+.scan-result-bar.weak {
+	background: var(--danger);
+}
+
+.scan-result-signal {
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+	min-width: 40px;
+	text-align: right;
+}
+
+.scan-results-empty {
+	text-align: center;
+	color: var(--text-secondary);
+	padding: 24px;
+	font-size: 0.875rem;
+}
+
 /* Audio Player (Fixed Bottom) */
 .audio-player {
 	position: fixed;

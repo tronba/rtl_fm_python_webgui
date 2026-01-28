@@ -38,10 +38,17 @@
 			audioPlayer: document.getElementById('audio-player'),
 			squelchSlider: document.getElementById('squelch-slider'),
 			squelchValue: document.getElementById('squelch-value'),
-			// New player elements
+			// Player elements
 			playBtn: document.getElementById('player-btn-play'),
 			liveBtn: document.getElementById('player-btn-live'),
-			playerStatus: document.getElementById('player-status')
+			playerStatus: document.getElementById('player-status'),
+			// Scanner elements
+			scanBtn: document.getElementById('scan-btn'),
+			scanStatus: document.getElementById('scan-status'),
+			scanProgressContainer: document.getElementById('scan-progress-container'),
+			scanProgressBar: document.getElementById('scan-progress-bar'),
+			scanProgressText: document.getElementById('scan-progress-text'),
+			scanResults: document.getElementById('scan-results')
 		};
 
 		// Setup event listeners
@@ -56,6 +63,9 @@
 
 		// Setup custom audio player
 		setupAudioPlayer();
+
+		// Setup scanner
+		setupScanner();
 	}
 
 	function setupAudioPlayer() {
@@ -141,6 +151,184 @@
 			elements.playerStatus.textContent = 'Feil - trykk Direkte';
 			elements.playerStatus.classList.add('error');
 		}
+	}
+
+	// ========== FM Band Scanner ==========
+	let scannerRunning = false;
+	let scannerAbort = false;
+
+	function setupScanner() {
+		if (elements.scanBtn) {
+			elements.scanBtn.addEventListener('click', toggleScanner);
+		}
+	}
+
+	function toggleScanner() {
+		if (scannerRunning) {
+			stopScanner();
+		} else {
+			startScanner();
+		}
+	}
+
+	async function startScanner() {
+		if (scannerRunning) return;
+		
+		scannerRunning = true;
+		scannerAbort = false;
+		
+		// Update UI
+		if (elements.scanBtn) {
+			elements.scanBtn.textContent = 'Stopp skanning';
+			elements.scanBtn.classList.add('scanning');
+		}
+		if (elements.scanProgressContainer) {
+			elements.scanProgressContainer.style.display = 'block';
+		}
+		if (elements.scanResults) {
+			elements.scanResults.innerHTML = '';
+		}
+		
+		// Pause state polling during scan
+		if (pollInterval) {
+			clearInterval(pollInterval);
+			pollInterval = null;
+		}
+
+		// Scan parameters
+		const startFreq = 88.0;
+		const endFreq = 108.0;
+		const step = 0.1;
+		const settleTime = 150; // ms to wait after tuning
+		const sampleCount = 3; // samples to average
+		
+		const results = [];
+		const totalSteps = Math.round((endFreq - startFreq) / step);
+		let currentStep = 0;
+
+		// Scan the band
+		for (let freq = startFreq; freq <= endFreq; freq += step) {
+			if (scannerAbort) break;
+			
+			currentStep++;
+			const freqStr = freq.toFixed(1) + 'M';
+			
+			// Update progress
+			const progress = Math.round((currentStep / totalSteps) * 100);
+			updateScanProgress(progress, freqStr);
+			
+			try {
+				// Tune to frequency
+				await fetch('/frequency/human/' + freqStr);
+				
+				// Wait for signal to settle
+				await sleep(settleTime);
+				
+				// Take multiple samples and average
+				let totalSignal = 0;
+				for (let i = 0; i < sampleCount; i++) {
+					const response = await fetch('/state');
+					const data = await response.json();
+					totalSignal += parseInt(data.s_level) || 0;
+					if (i < sampleCount - 1) await sleep(50);
+				}
+				const avgSignal = Math.round(totalSignal / sampleCount);
+				
+				// Store result if signal is above noise floor
+				if (avgSignal > 15) {
+					results.push({ freq: freq, signal: avgSignal, freqStr: freqStr });
+				}
+			} catch (err) {
+				console.error('Scan error at ' + freqStr + ':', err);
+			}
+		}
+
+		// Scan complete
+		scannerRunning = false;
+		
+		// Restore UI
+		if (elements.scanBtn) {
+			elements.scanBtn.textContent = 'Skann FM-båndet';
+			elements.scanBtn.classList.remove('scanning');
+		}
+		if (elements.scanProgressContainer) {
+			elements.scanProgressContainer.style.display = 'none';
+		}
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = scannerAbort ? 'Avbrutt' : 'Ferdig - ' + results.length + ' stasjoner funnet';
+		}
+
+		// Sort by signal strength (strongest first)
+		results.sort((a, b) => b.signal - a.signal);
+		
+		// Display results
+		displayScanResults(results);
+		
+		// Resume state polling
+		pollInterval = setInterval(fetchState, 500);
+	}
+
+	function stopScanner() {
+		scannerAbort = true;
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = 'Stopper...';
+		}
+	}
+
+	function updateScanProgress(percent, freqStr) {
+		if (elements.scanProgressBar) {
+			elements.scanProgressBar.style.width = percent + '%';
+		}
+		if (elements.scanProgressText) {
+			elements.scanProgressText.textContent = freqStr + ' (' + percent + '%)';
+		}
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = 'Skanner...';
+		}
+	}
+
+	function displayScanResults(results) {
+		if (!elements.scanResults) return;
+		
+		if (results.length === 0) {
+			elements.scanResults.innerHTML = '<div class="scan-results-empty">Ingen stasjoner funnet. Prøv å justere antennen.</div>';
+			return;
+		}
+
+		// Find max signal for scaling
+		const maxSignal = Math.max(...results.map(r => r.signal));
+		
+		let html = '';
+		results.forEach(result => {
+			const barWidth = Math.round((result.signal / maxSignal) * 100);
+			let strengthClass = 'weak';
+			if (result.signal > maxSignal * 0.7) strengthClass = 'strong';
+			else if (result.signal > maxSignal * 0.4) strengthClass = 'medium';
+			
+			html += `
+				<div class="scan-result-item" data-freq="${result.freqStr}">
+					<span class="scan-result-freq">${result.freq.toFixed(1)}</span>
+					<div class="scan-result-bar-container">
+						<div class="scan-result-bar ${strengthClass}" style="width: ${barWidth}%"></div>
+					</div>
+					<span class="scan-result-signal">${result.signal}</span>
+				</div>
+			`;
+		});
+		
+		elements.scanResults.innerHTML = html;
+		
+		// Add click handlers
+		elements.scanResults.querySelectorAll('.scan-result-item').forEach(item => {
+			item.addEventListener('click', () => {
+				const freq = item.dataset.freq;
+				setFrequencyHuman(freq);
+			});
+		});
+	}
+
+	function sleep(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
 	function setupEventListeners() {
@@ -408,7 +596,9 @@
 		setAutoGain,
 		setSquelch,
 		togglePlayback,
-		goLive
+		goLive,
+		startScanner,
+		stopScanner
 	};
 
 })();
