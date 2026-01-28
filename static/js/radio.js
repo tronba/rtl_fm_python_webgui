@@ -153,12 +153,21 @@
 		}
 	}
 
-	// ========== FM Band Scanner (using rtl_power FFT) ==========
+	// ========== FM Band Scanner (client-side using rtl_fm signal levels) ==========
 	let scannerRunning = false;
+	let scannerAbort = false;
 
 	function setupScanner() {
 		if (elements.scanBtn) {
-			elements.scanBtn.addEventListener('click', startScanner);
+			elements.scanBtn.addEventListener('click', toggleScanner);
+		}
+	}
+
+	function toggleScanner() {
+		if (scannerRunning) {
+			scannerAbort = true;
+		} else {
+			startScanner();
 		}
 	}
 
@@ -166,12 +175,12 @@
 		if (scannerRunning) return;
 		
 		scannerRunning = true;
+		scannerAbort = false;
 		
 		// Update UI
 		if (elements.scanBtn) {
-			elements.scanBtn.textContent = 'Skanner...';
+			elements.scanBtn.textContent = 'Stopp skanning';
 			elements.scanBtn.classList.add('scanning');
-			elements.scanBtn.disabled = true;
 		}
 		if (elements.scanProgressContainer) {
 			elements.scanProgressContainer.style.display = 'block';
@@ -180,34 +189,56 @@
 			elements.scanResults.innerHTML = '';
 		}
 		if (elements.scanStatus) {
-			elements.scanStatus.textContent = 'Utfører spektrumanalyse med rtl_power...';
+			elements.scanStatus.textContent = 'Starter skanning...';
 		}
 		
-		// Show indeterminate progress
-		if (elements.scanProgressBar) {
-			elements.scanProgressBar.style.width = '100%';
-			elements.scanProgressBar.style.animation = 'pulse 1.5s infinite';
+		// Pause state polling during scan
+		if (pollInterval) {
+			clearInterval(pollInterval);
+			pollInterval = null;
 		}
-		if (elements.scanProgressText) {
-			elements.scanProgressText.textContent = 'Analyserer 87.5 - 108 MHz...';
+
+		// Save current state and set fixed gain for consistent scanning
+		let previousState = null;
+		try {
+			const stateResponse = await fetch('/state');
+			previousState = await stateResponse.json();
+			
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = 'Setter fast forsterkning (gain 28)...';
+			}
+			await fetch('/gain/28');
+			await sleep(300);
+			
+		} catch (err) {
+			console.error('Failed to set scan gain:', err);
 		}
 
 		try {
-			// Call the server-side rtl_power scan
-			// threshold=6 means 6dB above noise floor
-			const response = await fetch('/scan/fm?start=87.5&end=108&threshold=6');
-			const data = await response.json();
+			// Scan the FM band
+			const scanResults = await performBandScan();
 			
-			if (data.error) {
-				throw new Error(data.error);
-			}
-			
-			// Display results
-			displayRtlPowerResults(data);
-			
-			if (elements.scanStatus) {
-				const count = data.stations ? data.stations.length : 0;
-				elements.scanStatus.textContent = `Ferdig - ${count} stasjoner funnet`;
+			if (scannerAbort) {
+				if (elements.scanStatus) {
+					elements.scanStatus.textContent = 'Avbrutt';
+				}
+			} else if (scanResults.stations.length === 0) {
+				if (elements.scanStatus) {
+					elements.scanStatus.textContent = 'Ingen stasjoner funnet';
+				}
+				if (elements.scanResults) {
+					elements.scanResults.innerHTML = `
+						<div class="scan-results-empty">
+							Ingen stasjoner funnet.<br>
+							<small>Støygulv: ${scanResults.noiseFloor}, Terskel: ${scanResults.threshold}</small><br>
+							<small>Prøv å justere antennen.</small>
+						</div>`;
+				}
+			} else {
+				displayScanResults(scanResults);
+				if (elements.scanStatus) {
+					elements.scanStatus.textContent = `Ferdig - ${scanResults.stations.length} stasjoner funnet`;
+				}
 			}
 			
 		} catch (err) {
@@ -215,12 +246,18 @@
 			if (elements.scanStatus) {
 				elements.scanStatus.textContent = 'Feil: ' + err.message;
 			}
-			if (elements.scanResults) {
-				elements.scanResults.innerHTML = `
-					<div class="scan-results-empty">
-						Skanning feilet: ${err.message}<br>
-						<small>Sjekk at rtl_power er installert (apt install rtl-sdr)</small>
-					</div>`;
+		}
+
+		// Restore previous gain state
+		if (previousState) {
+			try {
+				if (previousState.autogain) {
+					await fetch('/gain/auto');
+				} else {
+					await fetch('/gain/' + previousState.gain);
+				}
+			} catch (err) {
+				console.error('Failed to restore gain:', err);
 			}
 		}
 
@@ -230,52 +267,143 @@
 		if (elements.scanBtn) {
 			elements.scanBtn.textContent = 'Skann FM-båndet';
 			elements.scanBtn.classList.remove('scanning');
-			elements.scanBtn.disabled = false;
 		}
 		if (elements.scanProgressContainer) {
 			elements.scanProgressContainer.style.display = 'none';
 		}
+		
+		// Resume state polling
+		pollInterval = setInterval(fetchState, 500);
+	}
+
+	async function performBandScan() {
+		const startFreq = 87.5;
+		const endFreq = 108.0;
+		const step = 0.1;
+		const settleTime = 150;  // ms to let signal stabilize
+		const sampleCount = 5;   // samples to average
+		
+		const rawResults = [];
+		const totalSteps = Math.round((endFreq - startFreq) / step);
+		let currentStep = 0;
+
+		// Phase 1: Collect all signal levels
+		for (let freq = startFreq; freq <= endFreq && !scannerAbort; freq += step) {
+			currentStep++;
+			const freqStr = freq.toFixed(1) + 'M';
+			
+			const progress = Math.round((currentStep / totalSteps) * 80);
+			updateScanProgress(progress, freqStr);
+			
+			try {
+				await fetch('/frequency/human/' + freqStr);
+				await sleep(settleTime);
+				
+				// Take multiple samples and average
+				let totalSignal = 0;
+				for (let i = 0; i < sampleCount; i++) {
+					const response = await fetch('/state');
+					const data = await response.json();
+					totalSignal += parseInt(data.s_level) || 0;
+					if (i < sampleCount - 1) await sleep(30);
+				}
+				const avgSignal = Math.round(totalSignal / sampleCount);
+				
+				rawResults.push({ freq, signal: avgSignal });
+				
+			} catch (err) {
+				console.error('Scan error at ' + freqStr + ':', err);
+			}
+		}
+
+		if (scannerAbort || rawResults.length === 0) {
+			return { stations: [], noiseFloor: 0, threshold: 0 };
+		}
+
+		// Phase 2: Calculate noise floor from bottom 25%
+		const sortedBySignal = [...rawResults].sort((a, b) => a.signal - b.signal);
+		const bottomQuarter = sortedBySignal.slice(0, Math.ceil(sortedBySignal.length / 4));
+		const noiseFloor = Math.round(bottomQuarter.reduce((sum, r) => sum + r.signal, 0) / bottomQuarter.length);
+		
+		// Threshold: noise floor + 25%
+		const threshold = Math.round(noiseFloor * 1.25);
+		console.log('Noise floor:', noiseFloor, 'Threshold:', threshold);
+
+		// Phase 3: Find peaks (local maxima above threshold)
+		const peaks = [];
+		for (let i = 0; i < rawResults.length; i++) {
+			const current = rawResults[i];
+			
+			if (current.signal < threshold) continue;
+			
+			// Check if local maximum (higher than immediate neighbors)
+			const prev = rawResults[i - 1];
+			const next = rawResults[i + 1];
+			
+			const higherThanPrev = !prev || current.signal >= prev.signal;
+			const higherThanNext = !next || current.signal >= next.signal;
+			
+			if (higherThanPrev && higherThanNext) {
+				peaks.push(current);
+			}
+		}
+
+		// Phase 4: Deduplicate (keep strongest within 0.3 MHz)
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = `Fant ${peaks.length} kandidater, dedupliserer...`;
+		}
+		updateScanProgress(90, 'Dedupliserer...');
+		
+		peaks.sort((a, b) => b.signal - a.signal);
+		const stations = [];
+		for (const peak of peaks) {
+			const tooClose = stations.find(s => Math.abs(s.freq - peak.freq) < 0.3);
+			if (!tooClose) {
+				stations.push({
+					frequency: peak.freq,
+					signal: peak.signal,
+					snr: peak.signal - noiseFloor
+				});
+			}
+		}
+
+		updateScanProgress(100, 'Ferdig');
+		
+		return { stations, noiseFloor, threshold };
+	}
+
+	function updateScanProgress(percent, text) {
 		if (elements.scanProgressBar) {
-			elements.scanProgressBar.style.animation = '';
+			elements.scanProgressBar.style.width = percent + '%';
+		}
+		if (elements.scanProgressText) {
+			elements.scanProgressText.textContent = text + ' (' + percent + '%)';
 		}
 	}
 
-	function displayRtlPowerResults(data) {
+	function displayScanResults(scanData) {
 		if (!elements.scanResults) return;
 		
-		const stations = data.stations || [];
-		
-		if (stations.length === 0) {
-			elements.scanResults.innerHTML = `
-				<div class="scan-results-empty">
-					Ingen stasjoner funnet.<br>
-					<small>Støygulv: ${data.noise_floor || '?'} dB, Terskel: ${data.threshold || '?'} dB</small><br>
-					<small>Prøv å justere antennen eller senke terskelen.</small>
-				</div>`;
-			return;
-		}
-
-		// Find max SNR for scaling
-		const maxSnr = Math.max(...stations.map(s => s.snr));
+		const { stations, noiseFloor, threshold } = scanData;
+		const maxSignal = Math.max(...stations.map(s => s.signal));
 		
 		let html = '';
 		
 		// Debug info
 		html += `<div class="scan-debug-info">
-			Støygulv: ${data.noise_floor} dB | Terskel: ${data.threshold} dB | 
-			FFT bins: ${data.total_bins}
+			Støygulv: ${noiseFloor} | Terskel: ${threshold} | Maks: ${maxSignal}
 		</div>`;
 		
 		// Results
 		stations.forEach(station => {
-			const barWidth = Math.round((station.snr / maxSnr) * 100);
+			const barWidth = Math.round((station.snr / (maxSignal - noiseFloor)) * 100);
 			html += `
-				<div class="scan-result-item" data-freq="${station.frequency}">
+				<div class="scan-result-item" data-freq="${station.frequency.toFixed(1)}M">
 					<span class="scan-result-freq">${station.frequency.toFixed(1)} MHz</span>
 					<div class="scan-result-bar-container">
-						<div class="scan-result-bar" style="width: ${barWidth}%"></div>
+						<div class="scan-result-bar" style="width: ${Math.min(barWidth, 100)}%"></div>
 					</div>
-					<span class="scan-result-signal">${station.snr.toFixed(0)} dB</span>
+					<span class="scan-result-signal">+${station.snr}</span>
 				</div>`;
 		});
 		
@@ -285,7 +413,7 @@
 		elements.scanResults.querySelectorAll('.scan-result-item').forEach(item => {
 			item.addEventListener('click', () => {
 				const freq = item.dataset.freq;
-				setFrequency(freq + 'M');
+				setFrequency(freq);
 			});
 		});
 	}
