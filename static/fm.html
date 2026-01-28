@@ -558,6 +558,8 @@
 		// Sweep scanner state
 		let sweepRunning = false;
 		let sweepAbort = false;
+		let fineTuning = false;
+		let fineTuneAbort = false;
 		let currentSweepFreq = 87.5;
 		let sweepSpeed = 600;  // ms per step (Fast default)
 		let markedStations = [];  // Array of {freq, signal, name}
@@ -633,16 +635,20 @@
 		}
 		
 		async function toggleSweep() {
-			if (sweepRunning) {
-				// Stop sweep
-				sweepAbort = true;
+			if (fineTuning) {
+				// Stop fine-tuning completely
+				fineTuneAbort = true;
 				channelsDisabled = false;
 				elements.sweepStartBtn.textContent = '▶️ Start Sweep';
 				elements.sweepStartBtn.classList.remove('sweeping');
 				elements.sweepMarkBtn.disabled = true;
 				elements.headerProgress.classList.remove('active');
-				setStatus('Stopped');
+				setStatus('Fine-tuning stopped');
 				updateChannelListUI();
+			} else if (sweepRunning) {
+				// Stop sweep but proceed to fine-tune
+				sweepAbort = true;
+				setStatus('Stopping sweep, will fine-tune marked stations...');
 			} else {
 				// Clear current marks for fresh sweep
 				markedStations = [];
@@ -760,18 +766,22 @@
 				}
 			}
 			
-			if (!sweepAbort) {
-				elements.headerProgressFill.style.width = '100%';
+			elements.headerProgressFill.style.width = '100%';
+			
+			if (markedStations.length > 0) {
+				setStatus(`${markedStations.length} marked - fine-tuning...`);
+				// Gray out mark button during fine-tune
+				elements.sweepMarkBtn.disabled = true;
+				fineTuning = true;
+				fineTuneAbort = false;
+				await finetuneMarkedStations();
+				fineTuning = false;
 				
-				if (markedStations.length > 0) {
-					setStatus(`${markedStations.length} marked - fine-tuning...`);
-					// Gray out mark button during fine-tune
-					elements.sweepMarkBtn.disabled = true;
-					await finetuneMarkedStations();
+				if (!fineTuneAbort) {
 					setStatus(`Done! ${markedStations.length} stations found.`);
-				} else {
-					setStatus('Done - no stations marked.');
 				}
+			} else {
+				setStatus('Done - no stations marked.');
 			}
 		}
 		
@@ -810,7 +820,7 @@
 		async function finetuneMarkedStations() {
 			const fineTunedStations = [];
 			
-			for (let i = 0; i < markedStations.length; i++) {
+			for (let i = 0; i < markedStations.length && !fineTuneAbort; i++) {
 				const mark = markedStations[i];
 				setStatus(`Fine-tuning ${i + 1}/${markedStations.length}: ${mark.freq.toFixed(1)} MHz`);
 				
@@ -821,7 +831,7 @@
 				let bestFreq = mark.freq;
 				let bestSignal = 0;
 				
-				for (let freq = scanStart; freq <= scanEnd; freq += step) {
+				for (let freq = scanStart; freq <= scanEnd && !fineTuneAbort; freq += step) {
 					try {
 						await fetch('/frequency/human/' + freq.toFixed(2) + 'M');
 						
@@ -968,7 +978,33 @@
 			const currentMHz = state.freq_i / 1000000;
 			const roundedFreq = Math.round(currentMHz * 10) / 10;
 			
-			// Check if already exists
+			// Check if we have a currently playing channel and are within 1 MHz of it
+			if (currentPlayingFreq !== null) {
+				const distanceFromPlaying = Math.abs(roundedFreq - currentPlayingFreq);
+				
+				if (distanceFromPlaying < 1.0) {
+					// Update the existing channel instead of creating new
+					const existingStation = markedStations.find(s => s.freq === currentPlayingFreq);
+					if (existingStation) {
+						const oldFreq = existingStation.freq;
+						existingStation.freq = roundedFreq;
+						existingStation.signal = state.s_level || 0;
+						
+						// Update currentPlayingFreq to new frequency
+						currentPlayingFreq = roundedFreq;
+						
+						// Re-sort by frequency
+						markedStations.sort((a, b) => a.freq - b.freq);
+						
+						updateChannelListUI();
+						saveChannelsToStorage();
+						setStatus(`Updated ${oldFreq.toFixed(1)} → ${roundedFreq.toFixed(1)} MHz`);
+						return;
+					}
+				}
+			}
+			
+			// Check if already exists at exact frequency
 			const exists = markedStations.some(s => Math.abs(s.freq - roundedFreq) < 0.05);
 			if (exists) {
 				setStatus(`${roundedFreq.toFixed(1)} MHz already in channels`);
