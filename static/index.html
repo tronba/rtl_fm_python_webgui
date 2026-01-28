@@ -1,25 +1,59 @@
-<html>
+<!DOCTYPE html>
+<html lang="no">
 <head>
-<meta name="viewport" content="initial-scale=1.5, user-scalable=no">
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/react.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/react/0.10.0/JSXTransformer.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<style>
-audio::-webkit-media-controls-timeline,
-audio::-webkit-media-controls-current-time-display,
-audio::-webkit-media-controls-time-remaining-display {
-  display: none;
-}
-</style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>Nødhub Radio</title>
+	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h2>Live Audio Stream</h2>
-<audio controls autoplay preload="none" id="audioPlayer">
-<source src="/stream.mp3" type="audio/mpeg">
-Your browser does not support the audio element.
-</audio>
-<hr>
-<div id="state"></div>
-<script type="text/jsx" src="rtl_fm_python.js"></script>
+	<div class="header">
+		<h1>📻 Nødhub Radio</h1>
+		<p class="subtitle">Velg radiomodus</p>
+	</div>
+
+	<div class="mode-grid">
+		<a href="fm.html" class="mode-card">
+			<div class="icon">📻</div>
+			<h2>FM Radio</h2>
+			<p>Hør på FM-radiostasjoner (87.5 - 108 MHz). Merk: Norge har slått av riksdekkende FM, men noen lokalradioer finnes fortsatt.</p>
+			<div class="antenna-hint">
+				📶 Antenne: <strong>Full lengde (~75 cm)</strong>
+			</div>
+		</a>
+
+		<a href="pmr446.html" class="mode-card">
+			<div class="icon">📞</div>
+			<h2>PMR446 Walkie-Talkie</h2>
+			<p>Lytt på PMR446 walkie-talkie frekvenser (446 MHz). Lisensfrí kommunikasjon.</p>
+			<div class="antenna-hint">
+				📶 Antenne: <strong>~16 cm</strong>
+			</div>
+		</a>
+
+		<a href="marine.html" class="mode-card">
+			<div class="icon">⚓</div>
+			<h2>Maritim VHF</h2>
+			<p>Lytt på marine VHF kanaler (156-162 MHz). Kanal 16 er nødkanal.</p>
+			<div class="antenna-hint">
+				📶 Antenne: <strong>~46 cm</strong>
+			</div>
+		</a>
+
+		<a href="air.html" class="mode-card">
+			<div class="icon">✈️</div>
+			<h2>Flyradio</h2>
+			<p>Lytt på luftfart kommunikasjon (118-137 MHz). AM modulasjon.</p>
+			<div class="antenna-hint">
+				📶 Antenne: <strong>~55 cm</strong>
+			</div>
+		</a>
+	</div>
+
+	<div class="card" style="margin-top: 24px; text-align: center;">
+		<p style="color: var(--text-secondary); font-size: 0.875rem;">
+			💡 Trekk ut antennen til anbefalt lengde for best mottak
+		</p>
+	</div>
 </body>
 </html>

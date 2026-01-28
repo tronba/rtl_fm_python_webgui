@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>Maritim VHF</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<a href="index.html" class="back-btn">← Tilbake</a>
+
+	<div class="header">
+		<h1>⚓ Maritim VHF</h1>
+		<p class="subtitle">156-162 MHz</p>
+	</div>
+
+	<!-- Frequency Display -->
+	<div class="card frequency-display">
+		<div>
+			<span class="frequency-value" id="freq-display">---</span>
+			<span class="frequency-unit">MHz</span>
+		</div>
+		<div class="signal-meter">
+			<div class="signal-bar-container">
+				<div class="signal-bar" id="signal-bar" style="width: 0%"></div>
+			</div>
+			<div class="signal-value">Signal: <span id="signal-value">0</span></div>
+		</div>
+	</div>
+
+	<!-- Emergency Channel -->
+	<div class="card" style="border: 2px solid var(--danger);">
+		<div class="card-title" style="color: var(--danger);">🆘 Nødkanal</div>
+		<div class="presets-grid">
+			<button class="preset-btn" data-preset="156.8M" style="border-color: var(--danger); grid-column: span 2;">
+				<span class="freq" style="font-size: 1.25rem;">Kanal 16</span>
+				<span class="name">156.800 MHz - Nød & Oppkall</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- Common Channels -->
+	<div class="card">
+		<div class="card-title">Vanlige kanaler</div>
+		<div class="presets-grid">
+			<button class="preset-btn" data-preset="156.3M">
+				<span class="freq">Kanal 6</span>
+				<span class="name">Skip-til-skip</span>
+			</button>
+			<button class="preset-btn" data-preset="156.45M">
+				<span class="freq">Kanal 9</span>
+				<span class="name">Oppkall</span>
+			</button>
+			<button class="preset-btn" data-preset="156.55M">
+				<span class="freq">Kanal 11</span>
+				<span class="name">VTS</span>
+			</button>
+			<button class="preset-btn" data-preset="156.6M">
+				<span class="freq">Kanal 12</span>
+				<span class="name">Havn/VTS</span>
+			</button>
+			<button class="preset-btn" data-preset="156.65M">
+				<span class="freq">Kanal 13</span>
+				<span class="name">Bro-til-bro</span>
+			</button>
+			<button class="preset-btn" data-preset="156.7M">
+				<span class="freq">Kanal 14</span>
+				<span class="name">Havn</span>
+			</button>
+			<button class="preset-btn" data-preset="161.65M">
+				<span class="freq">Kanal 70</span>
+				<span class="name">DSC (Digital)</span>
+			</button>
+			<button class="preset-btn" data-preset="157.1M">
+				<span class="freq">Kanal 22</span>
+				<span class="name">Kystvakt</span>
+			</button>
+		</div>
+		<div class="antenna-guide">
+			📶 Antenne: <strong>~46 cm</strong>
+		</div>
+	</div>
+
+	<!-- Manual Tuning -->
+	<div class="card">
+		<div class="card-title">Manuell justering</div>
+		<div class="tuning-controls">
+			<div class="tune-btn-group">
+				<button class="tune-btn" data-tune="-0.05">-50k</button>
+				<button class="tune-btn" data-tune="-0.025">-25k</button>
+			</div>
+			<div class="tune-btn-group">
+				<button class="tune-btn" data-tune="0.025">+25k</button>
+				<button class="tune-btn" data-tune="0.05">+50k</button>
+			</div>
+		</div>
+		<div class="freq-input-group">
+			<input type="text" class="freq-input" id="freq-input" placeholder="F.eks. 156.8M">
+			<button class="set-btn" id="set-freq-btn">Sett</button>
+		</div>
+	</div>
+
+	<!-- Settings -->
+	<div class="card">
+		<div class="card-title">Innstillinger</div>
+		<div class="settings-row">
+			<div class="setting-group">
+				<label>Modulasjon</label>
+				<select id="mod-select">
+					<option value="f" selected>FM (NFM)</option>
+					<option value="w">WBFM</option>
+				</select>
+			</div>
+			<div class="setting-group">
+				<label>Forsterkning</label>
+				<select id="gain-select">
+					<option value="auto">Auto</option>
+				</select>
+			</div>
+		</div>
+		<div class="checkbox-group">
+			<input type="checkbox" id="autogain-check" checked>
+			<label for="autogain-check">Automatisk forsterkning</label>
+		</div>
+	</div>
+
+	<!-- Info -->
+	<div class="card">
+		<div class="card-title">ℹ️ Om Maritim VHF</div>
+		<p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+			<strong>Kanal 16 (156.8 MHz)</strong> er den internasjonale nød- og oppkallskanalen. 
+			Alle fartøy skal lytte på denne kanalen. Med RTL-SDR kan du kun <strong>lytte</strong>, 
+			ikke sende. For nødsituasjoner, ring <strong>120</strong> (Hovedredningssentralen).
+		</p>
+	</div>
+
+	<!-- Audio Player -->
+	<div class="audio-player">
+		<span class="audio-status" id="audio-status">○ Stoppet</span>
+		<audio controls id="audio-player" preload="none">
+			<source src="/stream.mp3" type="audio/mpeg">
+			Nettleseren støtter ikke lydavspilling.
+		</audio>
+	</div>
+
+	<script src="js/radio.js"></script>
+</body>
+</html>

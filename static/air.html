@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>Flyradio</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<a href="index.html" class="back-btn">← Tilbake</a>
+
+	<div class="header">
+		<h1>✈️ Flyradio</h1>
+		<p class="subtitle">Luftfart 118-137 MHz (AM)</p>
+	</div>
+
+	<!-- Frequency Display -->
+	<div class="card frequency-display">
+		<div>
+			<span class="frequency-value" id="freq-display">---</span>
+			<span class="frequency-unit">MHz</span>
+		</div>
+		<div class="signal-meter">
+			<div class="signal-bar-container">
+				<div class="signal-bar" id="signal-bar" style="width: 0%"></div>
+			</div>
+			<div class="signal-value">Signal: <span id="signal-value">0</span></div>
+		</div>
+	</div>
+
+	<!-- Emergency -->
+	<div class="card" style="border: 2px solid var(--danger);">
+		<div class="card-title" style="color: var(--danger);">🆘 Nødfrekvens</div>
+		<div class="presets-grid">
+			<button class="preset-btn" data-preset="121.5M" style="border-color: var(--danger); grid-column: span 2;">
+				<span class="freq" style="font-size: 1.25rem;">121.500 MHz</span>
+				<span class="name">Internasjonal nødfrekvens</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- Norwegian Airports -->
+	<div class="card">
+		<div class="card-title">Norske flyplasser</div>
+		<div class="presets-grid">
+			<button class="preset-btn" data-preset="118.1M">
+				<span class="freq">Oslo APP</span>
+				<span class="name">118.100</span>
+			</button>
+			<button class="preset-btn" data-preset="119.3M">
+				<span class="freq">Oslo TWR</span>
+				<span class="name">119.300</span>
+			</button>
+			<button class="preset-btn" data-preset="118.5M">
+				<span class="freq">Bergen TWR</span>
+				<span class="name">118.500</span>
+			</button>
+			<button class="preset-btn" data-preset="118.1M">
+				<span class="freq">Trondheim</span>
+				<span class="name">118.100</span>
+			</button>
+			<button class="preset-btn" data-preset="118.3M">
+				<span class="freq">Stavanger</span>
+				<span class="name">118.300</span>
+			</button>
+			<button class="preset-btn" data-preset="118.7M">
+				<span class="freq">Tromsø</span>
+				<span class="name">118.700</span>
+			</button>
+		</div>
+		<div class="antenna-guide">
+			📶 Antenne: <strong>~55 cm</strong>
+		</div>
+	</div>
+
+	<!-- Common Frequencies -->
+	<div class="card">
+		<div class="card-title">Andre frekvenser</div>
+		<div class="presets-grid">
+			<button class="preset-btn" data-preset="123.45M">
+				<span class="freq">Pilot-Pilot</span>
+				<span class="name">123.450</span>
+			</button>
+			<button class="preset-btn" data-preset="122.8M">
+				<span class="freq">AFIS</span>
+				<span class="name">122.800</span>
+			</button>
+			<button class="preset-btn" data-preset="128.825M">
+				<span class="freq">Polaris ACC</span>
+				<span class="name">128.825</span>
+			</button>
+			<button class="preset-btn" data-preset="124.2M">
+				<span class="freq">Bodø ACC</span>
+				<span class="name">124.200</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- Manual Tuning -->
+	<div class="card">
+		<div class="card-title">Manuell justering</div>
+		<div class="tuning-controls">
+			<div class="tune-btn-group">
+				<button class="tune-btn" data-tune="-1">-1</button>
+				<button class="tune-btn" data-tune="-0.1">-0.1</button>
+				<button class="tune-btn" data-tune="-0.025">-25k</button>
+			</div>
+			<div class="tune-btn-group">
+				<button class="tune-btn" data-tune="0.025">+25k</button>
+				<button class="tune-btn" data-tune="0.1">+0.1</button>
+				<button class="tune-btn" data-tune="1">+1</button>
+			</div>
+		</div>
+		<div class="freq-input-group">
+			<input type="text" class="freq-input" id="freq-input" placeholder="F.eks. 121.5M">
+			<button class="set-btn" id="set-freq-btn">Sett</button>
+		</div>
+	</div>
+
+	<!-- Settings -->
+	<div class="card">
+		<div class="card-title">Innstillinger</div>
+		<div class="settings-row">
+			<div class="setting-group">
+				<label>Modulasjon</label>
+				<select id="mod-select">
+					<option value="a" selected>AM</option>
+					<option value="f">FM</option>
+				</select>
+			</div>
+			<div class="setting-group">
+				<label>Forsterkning</label>
+				<select id="gain-select">
+					<option value="auto">Auto</option>
+				</select>
+			</div>
+		</div>
+		<div class="checkbox-group">
+			<input type="checkbox" id="autogain-check" checked>
+			<label for="autogain-check">Automatisk forsterkning</label>
+		</div>
+	</div>
+
+	<!-- Info -->
+	<div class="card">
+		<div class="card-title">ℹ️ Om Flyradio</div>
+		<p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+			Luftfart bruker <strong>AM modulasjon</strong> på 118-137 MHz. 
+			<strong>121.5 MHz</strong> er den internasjonale nødfrekvensen. 
+			Frekvensene kan variere - sjekk oppdaterte AIP Norge for korrekte frekvenser.
+		</p>
+	</div>
+
+	<!-- Audio Player -->
+	<div class="audio-player">
+		<span class="audio-status" id="audio-status">○ Stoppet</span>
+		<audio controls id="audio-player" preload="none">
+			<source src="/stream.mp3" type="audio/mpeg">
+			Nettleseren støtter ikke lydavspilling.
+		</audio>
+	</div>
+
+	<script src="js/radio.js"></script>
+</body>
+</html>
