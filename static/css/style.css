@@ -487,6 +487,33 @@ body {
 	font-size: 0.875rem;
 }
 
+.scan-more-section {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--bg-secondary);
+}
+
+.scan-more-btn {
+	width: 100%;
+	background: var(--bg-secondary);
+	border: none;
+	color: var(--text-secondary);
+	padding: 12px;
+	border-radius: 8px;
+	font-size: 0.875rem;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.scan-more-btn:hover, .scan-more-btn:active {
+	background: var(--bg-primary);
+	color: var(--text-primary);
+}
+
+.scan-more-results {
+	margin-top: 12px;
+}
+
 /* Audio Player (Fixed Bottom) */
 .audio-player {
 	position: fixed;

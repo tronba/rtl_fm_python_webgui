@@ -195,58 +195,60 @@
 			pollInterval = null;
 		}
 
-		// Scan parameters
-		const startFreq = 88.0;
-		const endFreq = 108.0;
-		const step = 0.1;
-		const settleTime = 150; // ms to wait after tuning
-		const sampleCount = 3; // samples to average
-		
-		const results = [];
-		const totalSteps = Math.round((endFreq - startFreq) / step);
-		let currentStep = 0;
+		try {
+			// === PHASE 1: Calibrate noise floor ===
+			updateScanProgress(0, 'Kalibrerer...');
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = 'Måler bakgrunnsstøy...';
+			}
+			
+			const noiseFloor = await calibrateNoiseFloor();
+			if (scannerAbort) throw new Error('Aborted');
+			
+			// Threshold = noise floor + 50% margin
+			const threshold = Math.round(noiseFloor * 1.5);
+			console.log('Noise floor:', noiseFloor, 'Threshold:', threshold);
 
-		// Scan the band
-		for (let freq = startFreq; freq <= endFreq; freq += step) {
-			if (scannerAbort) break;
+			// === PHASE 2: Coarse scan ===
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = 'Grovskanning...';
+			}
 			
-			currentStep++;
-			const freqStr = freq.toFixed(1) + 'M';
+			const coarseResults = await coarseScan(threshold);
+			if (scannerAbort) throw new Error('Aborted');
 			
-			// Update progress
-			const progress = Math.round((currentStep / totalSteps) * 100);
-			updateScanProgress(progress, freqStr);
+			// === PHASE 3: Fine-tune top candidates ===
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = 'Finjusterer...';
+			}
 			
-			try {
-				// Tune to frequency
-				await fetch('/frequency/human/' + freqStr);
-				
-				// Wait for signal to settle
-				await sleep(settleTime);
-				
-				// Take multiple samples and average
-				let totalSignal = 0;
-				for (let i = 0; i < sampleCount; i++) {
-					const response = await fetch('/state');
-					const data = await response.json();
-					totalSignal += parseInt(data.s_level) || 0;
-					if (i < sampleCount - 1) await sleep(50);
-				}
-				const avgSignal = Math.round(totalSignal / sampleCount);
-				
-				// Store result if signal is above noise floor
-				if (avgSignal > 15) {
-					results.push({ freq: freq, signal: avgSignal, freqStr: freqStr });
-				}
-			} catch (err) {
-				console.error('Scan error at ' + freqStr + ':', err);
+			// Take top 15 for fine-tuning (to get best 10 after)
+			const topCandidates = coarseResults.slice(0, 15);
+			const fineTunedResults = await fineTuneCandidates(topCandidates);
+			if (scannerAbort) throw new Error('Aborted');
+			
+			// Sort by signal strength
+			fineTunedResults.sort((a, b) => b.signal - a.signal);
+			
+			// Display results
+			displayScanResults(fineTunedResults, coarseResults.length);
+			
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = `Ferdig - ${fineTunedResults.length} sterke av ${coarseResults.length} totalt`;
+			}
+			
+		} catch (err) {
+			if (err.message !== 'Aborted') {
+				console.error('Scanner error:', err);
+			}
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = scannerAbort ? 'Avbrutt' : 'Feil under skanning';
 			}
 		}
 
-		// Scan complete
+		// Scan complete - restore UI
 		scannerRunning = false;
 		
-		// Restore UI
 		if (elements.scanBtn) {
 			elements.scanBtn.textContent = 'Skann FM-båndet';
 			elements.scanBtn.classList.remove('scanning');
@@ -254,18 +256,141 @@
 		if (elements.scanProgressContainer) {
 			elements.scanProgressContainer.style.display = 'none';
 		}
-		if (elements.scanStatus) {
-			elements.scanStatus.textContent = scannerAbort ? 'Avbrutt' : 'Ferdig - ' + results.length + ' stasjoner funnet';
-		}
-
-		// Sort by signal strength (strongest first)
-		results.sort((a, b) => b.signal - a.signal);
-		
-		// Display results
-		displayScanResults(results);
 		
 		// Resume state polling
 		pollInterval = setInterval(fetchState, 500);
+	}
+
+	async function calibrateNoiseFloor() {
+		// Sample frequencies unlikely to have stations
+		const emptyFreqs = ['87.5M', '87.7M', '107.7M', '107.9M'];
+		let totalSignal = 0;
+		let samples = 0;
+		
+		for (const freq of emptyFreqs) {
+			if (scannerAbort) break;
+			
+			await fetch('/frequency/human/' + freq);
+			await sleep(100);
+			
+			// Take a few samples
+			for (let i = 0; i < 3; i++) {
+				const response = await fetch('/state');
+				const data = await response.json();
+				totalSignal += parseInt(data.s_level) || 0;
+				samples++;
+				await sleep(30);
+			}
+		}
+		
+		return samples > 0 ? Math.round(totalSignal / samples) : 20;
+	}
+
+	async function coarseScan(threshold) {
+		const startFreq = 88.0;
+		const endFreq = 108.0;
+		const step = 0.2; // Coarse step
+		const settleTime = 100;
+		
+		const results = [];
+		const totalSteps = Math.round((endFreq - startFreq) / step);
+		let currentStep = 0;
+
+		for (let freq = startFreq; freq <= endFreq; freq += step) {
+			if (scannerAbort) break;
+			
+			currentStep++;
+			const freqStr = freq.toFixed(1) + 'M';
+			
+			// Progress: 5-60% for coarse scan
+			const progress = 5 + Math.round((currentStep / totalSteps) * 55);
+			updateScanProgress(progress, freqStr);
+			
+			try {
+				await fetch('/frequency/human/' + freqStr);
+				await sleep(settleTime);
+				
+				// Take samples
+				let totalSignal = 0;
+				for (let i = 0; i < 2; i++) {
+					const response = await fetch('/state');
+					const data = await response.json();
+					totalSignal += parseInt(data.s_level) || 0;
+					await sleep(30);
+				}
+				const avgSignal = Math.round(totalSignal / 2);
+				
+				// Keep if above threshold
+				if (avgSignal > threshold) {
+					results.push({ freq: freq, signal: avgSignal, freqStr: freqStr });
+				}
+			} catch (err) {
+				console.error('Coarse scan error at ' + freqStr + ':', err);
+			}
+		}
+
+		// Sort by signal and return
+		results.sort((a, b) => b.signal - a.signal);
+		return results;
+	}
+
+	async function fineTuneCandidates(candidates) {
+		const results = [];
+		const totalCandidates = candidates.length;
+		let currentCandidate = 0;
+		
+		for (const candidate of candidates) {
+			if (scannerAbort) break;
+			
+			currentCandidate++;
+			
+			// Progress: 60-95% for fine-tuning
+			const progress = 60 + Math.round((currentCandidate / totalCandidates) * 35);
+			updateScanProgress(progress, candidate.freq.toFixed(1) + 'M finjustering');
+			
+			// Scan ±0.2 MHz around candidate at 0.05 MHz steps
+			const centerFreq = candidate.freq;
+			const scanStart = centerFreq - 0.2;
+			const scanEnd = centerFreq + 0.2;
+			const step = 0.05;
+			
+			let bestFreq = centerFreq;
+			let bestSignal = candidate.signal;
+			
+			for (let freq = scanStart; freq <= scanEnd; freq += step) {
+				if (scannerAbort) break;
+				if (freq < 88.0 || freq > 108.0) continue;
+				
+				const freqStr = freq.toFixed(2) + 'M';
+				
+				try {
+					await fetch('/frequency/human/' + freqStr);
+					await sleep(80);
+					
+					const response = await fetch('/state');
+					const data = await response.json();
+					const signal = parseInt(data.s_level) || 0;
+					
+					if (signal > bestSignal) {
+						bestSignal = signal;
+						bestFreq = freq;
+					}
+				} catch (err) {
+					console.error('Fine-tune error:', err);
+				}
+			}
+			
+			// Round to nearest 0.05 for clean display
+			bestFreq = Math.round(bestFreq * 20) / 20;
+			
+			results.push({
+				freq: bestFreq,
+				signal: bestSignal,
+				freqStr: bestFreq.toFixed(1) + 'M'
+			});
+		}
+		
+		return results;
 	}
 
 	function stopScanner() {
@@ -282,12 +407,9 @@
 		if (elements.scanProgressText) {
 			elements.scanProgressText.textContent = freqStr + ' (' + percent + '%)';
 		}
-		if (elements.scanStatus) {
-			elements.scanStatus.textContent = 'Skanner...';
-		}
 	}
 
-	function displayScanResults(results) {
+	function displayScanResults(results, totalFound) {
 		if (!elements.scanResults) return;
 		
 		if (results.length === 0) {
@@ -298,33 +420,82 @@
 		// Find max signal for scaling
 		const maxSignal = Math.max(...results.map(r => r.signal));
 		
+		// Split into top 10 and rest
+		const topResults = results.slice(0, 10);
+		const moreResults = results.slice(10);
+		
 		let html = '';
-		results.forEach(result => {
-			const barWidth = Math.round((result.signal / maxSignal) * 100);
-			let strengthClass = 'weak';
-			if (result.signal > maxSignal * 0.7) strengthClass = 'strong';
-			else if (result.signal > maxSignal * 0.4) strengthClass = 'medium';
+		
+		// Top results
+		topResults.forEach(result => {
+			html += createResultItem(result, maxSignal);
+		});
+		
+		// "Show more" section if there are more results
+		if (moreResults.length > 0 || totalFound > results.length) {
+			const hiddenCount = moreResults.length;
+			const filteredCount = totalFound - results.length;
 			
 			html += `
-				<div class="scan-result-item" data-freq="${result.freqStr}">
-					<span class="scan-result-freq">${result.freq.toFixed(1)}</span>
-					<div class="scan-result-bar-container">
-						<div class="scan-result-bar ${strengthClass}" style="width: ${barWidth}%"></div>
+				<div class="scan-more-section">
+					<button class="scan-more-btn" id="scan-show-more">
+						Vis ${hiddenCount} flere stasjoner
+						${filteredCount > 0 ? `(${filteredCount} svake filtrert bort)` : ''}
+					</button>
+					<div class="scan-more-results" id="scan-more-results" style="display: none;">
+			`;
+			
+			moreResults.forEach(result => {
+				html += createResultItem(result, maxSignal);
+			});
+			
+			html += `
 					</div>
-					<span class="scan-result-signal">${result.signal}</span>
 				</div>
 			`;
-		});
+		}
 		
 		elements.scanResults.innerHTML = html;
 		
-		// Add click handlers
+		// Add click handlers for result items
 		elements.scanResults.querySelectorAll('.scan-result-item').forEach(item => {
 			item.addEventListener('click', () => {
 				const freq = item.dataset.freq;
 				setFrequencyHuman(freq);
 			});
 		});
+		
+		// Add click handler for "show more" button
+		const showMoreBtn = document.getElementById('scan-show-more');
+		const moreResultsDiv = document.getElementById('scan-more-results');
+		if (showMoreBtn && moreResultsDiv) {
+			showMoreBtn.addEventListener('click', () => {
+				if (moreResultsDiv.style.display === 'none') {
+					moreResultsDiv.style.display = 'block';
+					showMoreBtn.textContent = 'Skjul ekstra stasjoner';
+				} else {
+					moreResultsDiv.style.display = 'none';
+					showMoreBtn.textContent = `Vis ${moreResults.length} flere stasjoner`;
+				}
+			});
+		}
+	}
+
+	function createResultItem(result, maxSignal) {
+		const barWidth = Math.round((result.signal / maxSignal) * 100);
+		let strengthClass = 'weak';
+		if (result.signal > maxSignal * 0.7) strengthClass = 'strong';
+		else if (result.signal > maxSignal * 0.4) strengthClass = 'medium';
+		
+		return `
+			<div class="scan-result-item" data-freq="${result.freqStr}">
+				<span class="scan-result-freq">${result.freq.toFixed(1)}</span>
+				<div class="scan-result-bar-container">
+					<div class="scan-result-bar ${strengthClass}" style="width: ${barWidth}%"></div>
+				</div>
+				<span class="scan-result-signal">${result.signal}</span>
+			</div>
+		`;
 	}
 
 	function sleep(ms) {
