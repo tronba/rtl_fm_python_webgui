@@ -277,20 +277,25 @@
 			gap: 8px;
 		}
 		
-		.tune-group {
+		.tune-buttons-group {
 			display: flex;
 			gap: 4px;
+			flex: 1;
+			min-width: 280px;
+			max-width: 500px;
+			justify-content: center;
 		}
 		
 		.input-group {
 			display: flex;
 			gap: 4px;
+			justify-content: center;
 		}
 		
 		.manual-tuning-wrapper .tune-btn {
-			min-width: 38px;
-			max-width: 100px;
 			flex: 1;
+			min-width: 40px;
+			max-width: 80px;
 			height: 44px;
 			font-size: 14px;
 			font-weight: bold;
@@ -498,17 +503,15 @@
 	<div class="card">
 		<div class="card-title">🎛️ Manual Tuning</div>
 		<div class="manual-tuning-wrapper">
-			<div class="tune-group">
-				<button class="tune-btn" data-tune="-1">−1</button>
-				<button class="tune-btn" data-tune="-0.5">−.5</button>
-				<button class="tune-btn" data-tune="-0.1">−.1</button>
-			</div>
 			<div class="input-group">
 				<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
 				<button class="enter-btn" id="freq-enter-btn">Go</button>
 				<button class="save-text-btn" id="manual-save-btn">Save</button>
 			</div>
-			<div class="tune-group">
+			<div class="tune-buttons-group">
+				<button class="tune-btn" data-tune="-1">−1</button>
+				<button class="tune-btn" data-tune="-0.5">−.5</button>
+				<button class="tune-btn" data-tune="-0.1">−.1</button>
 				<button class="tune-btn" data-tune="0.1">+.1</button>
 				<button class="tune-btn" data-tune="0.5">+.5</button>
 				<button class="tune-btn" data-tune="1">+1</button>
