@@ -195,10 +195,32 @@
 			pollInterval = null;
 		}
 
+		// Save current gain state and set fixed gain for scanning
+		let previousGainState = null;
+		try {
+			const stateResponse = await fetch('/state');
+			const stateData = await stateResponse.json();
+			previousGainState = {
+				autogain: stateData.autogain,
+				gain: stateData.gain
+			};
+			console.log('Saved gain state:', previousGainState);
+			
+			// Set fixed gain for consistent scanning
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = 'Setter fast forsterkning...';
+			}
+			await fetch('/gain/28');
+			await sleep(200); // Let gain settle
+			
+		} catch (err) {
+			console.error('Failed to set scan gain:', err);
+		}
+
 		try {
 			// === PHASE 1: Full band scan (collect all data) ===
 			if (elements.scanStatus) {
-				elements.scanStatus.textContent = 'Skanner hele båndet...';
+				elements.scanStatus.textContent = 'Skanner hele båndet (fast gain)...';
 			}
 			
 			const allResults = await fullBandScan();
@@ -256,6 +278,24 @@
 			}
 		}
 
+		// Scan complete - restore previous gain state
+		if (previousGainState) {
+			try {
+				if (elements.scanStatus) {
+					elements.scanStatus.textContent = 'Gjenoppretter forsterkning...';
+				}
+				if (previousGainState.autogain) {
+					await fetch('/gain/auto');
+					console.log('Restored autogain');
+				} else {
+					await fetch('/gain/' + previousGainState.gain);
+					console.log('Restored gain to:', previousGainState.gain);
+				}
+			} catch (err) {
+				console.error('Failed to restore gain:', err);
+			}
+		}
+		
 		// Scan complete - restore UI
 		scannerRunning = false;
 		
