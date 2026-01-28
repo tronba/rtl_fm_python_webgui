@@ -274,6 +274,7 @@
 			display: flex;
 			flex-direction: column;
 			gap: 8px;
+			align-items: center;
 		}
 		
 		.manual-tuning-input-row {
@@ -286,12 +287,16 @@
 		.manual-tuning-buttons-row {
 			display: flex;
 			align-items: center;
+			justify-content: center;
 			gap: 6px;
+			max-width: 400px;
+			width: 100%;
 		}
 		
 		.manual-tuning-buttons-row .tune-btn {
 			flex: 1;
 			min-width: 40px;
+			max-width: 60px;
 			height: 44px;
 			font-size: 14px;
 			font-weight: bold;
@@ -307,7 +312,8 @@
 		}
 		
 		.manual-tuning-buttons-row .tune-btn.small {
-			flex: 0.7;
+			flex: 0.8;
+			max-width: 50px;
 		}
 		
 		.manual-tuning-input-row .freq-input {
