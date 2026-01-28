@@ -424,6 +424,16 @@ body {
 	overflow-y: auto;
 }
 
+.scan-debug-info {
+	font-size: 0.7rem;
+	color: var(--text-secondary);
+	text-align: center;
+	padding: 8px;
+	margin-bottom: 8px;
+	background: var(--bg-primary);
+	border-radius: 4px;
+}
+
 .scan-result-item {
 	display: flex;
 	align-items: center;

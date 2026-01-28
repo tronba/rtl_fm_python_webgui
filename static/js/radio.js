@@ -196,45 +196,55 @@
 		}
 
 		try {
-			// === PHASE 1: Calibrate noise floor ===
-			updateScanProgress(0, 'Kalibrerer...');
+			// === PHASE 1: Full band scan (collect all data) ===
 			if (elements.scanStatus) {
-				elements.scanStatus.textContent = 'Måler bakgrunnsstøy...';
+				elements.scanStatus.textContent = 'Skanner hele båndet...';
 			}
 			
-			const noiseFloor = await calibrateNoiseFloor();
+			const allResults = await fullBandScan();
 			if (scannerAbort) throw new Error('Aborted');
 			
-			// Threshold = noise floor + 50% margin
-			const threshold = Math.round(noiseFloor * 1.5);
-			console.log('Noise floor:', noiseFloor, 'Threshold:', threshold);
-
-			// === PHASE 2: Coarse scan ===
-			if (elements.scanStatus) {
-				elements.scanStatus.textContent = 'Grovskanning...';
+			if (allResults.length === 0) {
+				throw new Error('No data collected');
 			}
 			
-			const coarseResults = await coarseScan(threshold);
-			if (scannerAbort) throw new Error('Aborted');
+			// === PHASE 2: Calculate noise floor from actual data ===
+			// Sort by signal to find noise floor (bottom 25% average)
+			const sortedBySignal = [...allResults].sort((a, b) => a.signal - b.signal);
+			const bottomQuarter = sortedBySignal.slice(0, Math.ceil(sortedBySignal.length / 4));
+			const noiseFloor = Math.round(bottomQuarter.reduce((sum, r) => sum + r.signal, 0) / bottomQuarter.length);
+			
+			// Threshold: noise floor + 30% (more lenient)
+			const threshold = Math.round(noiseFloor * 1.3);
+			console.log('Noise floor (bottom 25%):', noiseFloor, 'Threshold:', threshold);
+			
+			// Filter to stations above threshold
+			const candidates = allResults.filter(r => r.signal > threshold);
+			candidates.sort((a, b) => b.signal - a.signal);
+			
+			console.log('Candidates above threshold:', candidates.length);
+			
+			if (elements.scanStatus) {
+				elements.scanStatus.textContent = `Fant ${candidates.length} kandidater, finjusterer...`;
+			}
 			
 			// === PHASE 3: Fine-tune top candidates ===
-			if (elements.scanStatus) {
-				elements.scanStatus.textContent = 'Finjusterer...';
-			}
-			
-			// Take top 15 for fine-tuning (to get best 10 after)
-			const topCandidates = coarseResults.slice(0, 15);
+			// Take more candidates for fine-tuning
+			const topCandidates = candidates.slice(0, 20);
 			const fineTunedResults = await fineTuneCandidates(topCandidates);
 			if (scannerAbort) throw new Error('Aborted');
 			
+			// Remove duplicates (stations within 0.15 MHz of each other)
+			const dedupedResults = deduplicateStations(fineTunedResults);
+			
 			// Sort by signal strength
-			fineTunedResults.sort((a, b) => b.signal - a.signal);
+			dedupedResults.sort((a, b) => b.signal - a.signal);
 			
 			// Display results
-			displayScanResults(fineTunedResults, coarseResults.length);
+			displayScanResults(dedupedResults, candidates.length, noiseFloor, threshold);
 			
 			if (elements.scanStatus) {
-				elements.scanStatus.textContent = `Ferdig - ${fineTunedResults.length} sterke av ${coarseResults.length} totalt`;
+				elements.scanStatus.textContent = `Ferdig - ${dedupedResults.length} stasjoner (støygulv: ${noiseFloor})`;
 			}
 			
 		} catch (err) {
@@ -261,36 +271,11 @@
 		pollInterval = setInterval(fetchState, 500);
 	}
 
-	async function calibrateNoiseFloor() {
-		// Sample frequencies unlikely to have stations
-		const emptyFreqs = ['87.5M', '87.7M', '107.7M', '107.9M'];
-		let totalSignal = 0;
-		let samples = 0;
-		
-		for (const freq of emptyFreqs) {
-			if (scannerAbort) break;
-			
-			await fetch('/frequency/human/' + freq);
-			await sleep(100);
-			
-			// Take a few samples
-			for (let i = 0; i < 3; i++) {
-				const response = await fetch('/state');
-				const data = await response.json();
-				totalSignal += parseInt(data.s_level) || 0;
-				samples++;
-				await sleep(30);
-			}
-		}
-		
-		return samples > 0 ? Math.round(totalSignal / samples) : 20;
-	}
-
-	async function coarseScan(threshold) {
+	async function fullBandScan() {
 		const startFreq = 88.0;
 		const endFreq = 108.0;
-		const step = 0.2; // Coarse step
-		const settleTime = 100;
+		const step = 0.1; // Back to finer step
+		const settleTime = 120;
 		
 		const results = [];
 		const totalSteps = Math.round((endFreq - startFreq) / step);
@@ -302,36 +287,52 @@
 			currentStep++;
 			const freqStr = freq.toFixed(1) + 'M';
 			
-			// Progress: 5-60% for coarse scan
-			const progress = 5 + Math.round((currentStep / totalSteps) * 55);
+			// Progress: 0-70% for full scan
+			const progress = Math.round((currentStep / totalSteps) * 70);
 			updateScanProgress(progress, freqStr);
 			
 			try {
 				await fetch('/frequency/human/' + freqStr);
 				await sleep(settleTime);
 				
-				// Take samples
+				// Take samples and average
 				let totalSignal = 0;
-				for (let i = 0; i < 2; i++) {
+				const sampleCount = 3;
+				for (let i = 0; i < sampleCount; i++) {
 					const response = await fetch('/state');
 					const data = await response.json();
 					totalSignal += parseInt(data.s_level) || 0;
-					await sleep(30);
+					await sleep(40);
 				}
-				const avgSignal = Math.round(totalSignal / 2);
+				const avgSignal = Math.round(totalSignal / sampleCount);
 				
-				// Keep if above threshold
-				if (avgSignal > threshold) {
-					results.push({ freq: freq, signal: avgSignal, freqStr: freqStr });
-				}
+				results.push({ freq: freq, signal: avgSignal, freqStr: freqStr });
+				
 			} catch (err) {
-				console.error('Coarse scan error at ' + freqStr + ':', err);
+				console.error('Scan error at ' + freqStr + ':', err);
 			}
 		}
 
-		// Sort by signal and return
-		results.sort((a, b) => b.signal - a.signal);
 		return results;
+	}
+
+	function deduplicateStations(results) {
+		// Remove stations too close together (keep strongest)
+		const dedupe = [];
+		const minSpacing = 0.15; // MHz
+		
+		for (const station of results) {
+			const tooClose = dedupe.find(s => Math.abs(s.freq - station.freq) < minSpacing);
+			if (!tooClose) {
+				dedupe.push(station);
+			} else if (station.signal > tooClose.signal) {
+				// Replace with stronger signal
+				const idx = dedupe.indexOf(tooClose);
+				dedupe[idx] = station;
+			}
+		}
+		
+		return dedupe;
 	}
 
 	async function fineTuneCandidates(candidates) {
@@ -409,11 +410,16 @@
 		}
 	}
 
-	function displayScanResults(results, totalFound) {
+	function displayScanResults(results, totalCandidates, noiseFloor, threshold) {
 		if (!elements.scanResults) return;
 		
 		if (results.length === 0) {
-			elements.scanResults.innerHTML = '<div class="scan-results-empty">Ingen stasjoner funnet. Prøv å justere antennen.</div>';
+			elements.scanResults.innerHTML = `
+				<div class="scan-results-empty">
+					Ingen stasjoner funnet.<br>
+					<small>Støygulv: ${noiseFloor || '?'}, Terskel: ${threshold || '?'}</small><br>
+					<small>Prøv å justere antennen.</small>
+				</div>`;
 			return;
 		}
 
@@ -426,21 +432,20 @@
 		
 		let html = '';
 		
+		// Debug info
+		html += `<div class="scan-debug-info">Støygulv: ${noiseFloor} | Terskel: ${threshold} | Maks signal: ${maxSignal}</div>`;
+		
 		// Top results
 		topResults.forEach(result => {
 			html += createResultItem(result, maxSignal);
 		});
 		
 		// "Show more" section if there are more results
-		if (moreResults.length > 0 || totalFound > results.length) {
-			const hiddenCount = moreResults.length;
-			const filteredCount = totalFound - results.length;
-			
+		if (moreResults.length > 0) {
 			html += `
 				<div class="scan-more-section">
 					<button class="scan-more-btn" id="scan-show-more">
-						Vis ${hiddenCount} flere stasjoner
-						${filteredCount > 0 ? `(${filteredCount} svake filtrert bort)` : ''}
+						Vis ${moreResults.length} flere stasjoner
 					</button>
 					<div class="scan-more-results" id="scan-more-results" style="display: none;">
 			`;
