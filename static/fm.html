@@ -259,16 +259,18 @@
 		}
 		
 		/* Manual Tuning */
-		.manual-tuning {
+		.manual-tuning-row {
 			display: flex;
 			align-items: center;
-			gap: 8px;
+			gap: 6px;
+			margin-bottom: 12px;
 		}
 		
-		.manual-tuning .tune-btn {
-			width: 50px;
-			height: 50px;
-			font-size: 18px;
+		.manual-tuning-row .tune-btn {
+			flex: 1;
+			min-width: 40px;
+			height: 44px;
+			font-size: 14px;
 			font-weight: bold;
 			border: none;
 			border-radius: 8px;
@@ -277,52 +279,128 @@
 			cursor: pointer;
 		}
 		
-		.manual-tuning .tune-btn:hover {
+		.manual-tuning-row .tune-btn:hover {
 			background: linear-gradient(135deg, #546E7A, #455A64);
 		}
 		
-		.manual-tuning .freq-input {
-			flex: 1;
+		.manual-tuning-row .tune-btn.small {
+			flex: 0.7;
+		}
+		
+		.manual-tuning-row .freq-input {
+			width: 110px;
+			flex-shrink: 0;
 			text-align: center;
-			font-size: 20px;
-			padding: 12px;
+			font-size: 16px;
+			padding: 10px 8px;
 			border: 2px solid #ddd;
 			border-radius: 8px;
 		}
 		
-		.manual-tuning .freq-input:focus {
+		.manual-tuning-row .freq-input:focus {
 			border-color: #2196F3;
 			outline: none;
 		}
 		
-		/* Status bar */
-		.status-bar {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 8px 0;
+		.manual-save-btn {
+			width: 100%;
+			padding: 12px;
+			background: linear-gradient(135deg, #2196F3, #1976D2);
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+		
+		.manual-save-btn:hover {
+			background: linear-gradient(135deg, #1976D2, #1565C0);
+		}
+		
+		/* Centered Signal Meter */
+		.signal-meter-container {
+			margin: 16px 0;
+			text-align: center;
+		}
+		
+		.signal-meter {
+			position: relative;
+			height: 32px;
+			background: linear-gradient(90deg, #e0e0e0 0%, #e0e0e0 50%, #e0e0e0 100%);
+			border-radius: 16px;
+			overflow: hidden;
+			border: 2px solid #ccc;
+		}
+		
+		.signal-meter-fill {
+			position: absolute;
+			top: 0;
+			height: 100%;
+			left: 50%;
+			width: 0%;
+			background: linear-gradient(90deg, #4CAF50, #8BC34A);
+			transition: width 0.3s ease;
+			border-radius: 0 16px 16px 0;
+		}
+		
+		.signal-meter-fill-left {
+			position: absolute;
+			top: 0;
+			height: 100%;
+			right: 50%;
+			width: 0%;
+			background: linear-gradient(270deg, #4CAF50, #8BC34A);
+			transition: width 0.3s ease;
+			border-radius: 16px 0 0 16px;
+		}
+		
+		.signal-meter-center {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 4px;
+			height: 100%;
+			background: #666;
+			z-index: 2;
+		}
+		
+		.signal-value-display {
+			font-size: 18px;
+			font-weight: 700;
+			color: #333;
+			margin-top: 8px;
+		}
+		
+		.status-text {
 			font-size: 14px;
 			color: #666;
+			margin-top: 4px;
 		}
 		
-		.status-bar .signal-info {
-			display: flex;
-			align-items: center;
-			gap: 8px;
+		/* Progress bar in header */
+		.header-progress {
+			display: none;
+			margin-top: 12px;
 		}
 		
-		.status-bar .signal-mini-bar {
-			width: 60px;
+		.header-progress.active {
+			display: block;
+		}
+		
+		.header-progress-bar {
 			height: 8px;
 			background: #e0e0e0;
 			border-radius: 4px;
 			overflow: hidden;
 		}
 		
-		.status-bar .signal-mini-bar-fill {
+		.header-progress-bar-fill {
 			height: 100%;
-			background: #4CAF50;
-			transition: width 0.3s;
+			background: linear-gradient(90deg, #ff9800, #ffc107);
+			transition: width 0.3s ease;
+			border-radius: 4px;
 		}
 	</style>
 </head>
@@ -340,15 +418,19 @@
 			<span class="frequency-value" id="freq-display">---</span>
 			<span class="frequency-unit">MHz</span>
 		</div>
-		<div class="status-bar">
-			<div class="signal-info">
-				<span>Signal:</span>
-				<div class="signal-mini-bar">
-					<div class="signal-mini-bar-fill" id="signal-bar" style="width: 0%"></div>
-				</div>
-				<span id="signal-value">0</span>
+		<div class="signal-meter-container">
+			<div class="signal-meter">
+				<div class="signal-meter-fill-left" id="signal-bar-left"></div>
+				<div class="signal-meter-fill" id="signal-bar-right"></div>
+				<div class="signal-meter-center"></div>
 			</div>
-			<span id="status-text">Ready</span>
+			<div class="signal-value-display">Signal: <span id="signal-value">0</span></div>
+		</div>
+		<div class="status-text" id="status-text">Ready</div>
+		<div class="header-progress" id="header-progress">
+			<div class="header-progress-bar">
+				<div class="header-progress-bar-fill" id="header-progress-fill" style="width: 0%"></div>
+			</div>
 		</div>
 	</div>
 
@@ -365,17 +447,10 @@
 				<button class="sweep-btn sweep-btn-mark" id="sweep-mark-btn" disabled>⭐ Mark</button>
 			</div>
 			
-			<div class="sweep-progress">
-				<div class="sweep-progress-bar-container">
-					<div class="sweep-progress-bar" id="sweep-progress-bar" style="width: 0%"></div>
-					<span class="sweep-progress-text" id="sweep-progress-text">87.5 MHz</span>
-				</div>
-			</div>
-			
 			<div class="speed-btn-group">
-				<button class="speed-btn" data-speed="400">Fast</button>
-				<button class="speed-btn active" data-speed="800">Medium</button>
 				<button class="speed-btn" data-speed="1500">Slow</button>
+				<button class="speed-btn active" data-speed="800">Medium</button>
+				<button class="speed-btn" data-speed="400">Fast</button>
 			</div>
 		</div>
 	</div>
@@ -395,11 +470,16 @@
 	<!-- Manual Tuning -->
 	<div class="card">
 		<div class="card-title">🎛️ Manual Tuning</div>
-		<div class="manual-tuning">
-			<button class="tune-btn" id="tune-down">−</button>
-			<input type="text" class="freq-input" id="freq-input" placeholder="e.g. 99.5 MHz">
-			<button class="tune-btn" id="tune-up">+</button>
+		<div class="manual-tuning-row">
+			<button class="tune-btn small" data-tune="-1">−1</button>
+			<button class="tune-btn small" data-tune="-0.5">−.5</button>
+			<button class="tune-btn" data-tune="-0.1">−.1</button>
+			<input type="text" class="freq-input" id="freq-input" placeholder="99.5 MHz">
+			<button class="tune-btn" data-tune="0.1">+.1</button>
+			<button class="tune-btn small" data-tune="0.5">+.5</button>
+			<button class="tune-btn small" data-tune="1">+1</button>
 		</div>
+		<button class="manual-save-btn" id="manual-save-btn">➕ Add Current Frequency to Channels</button>
 	</div>
 
 	<!-- Settings -->
@@ -475,9 +555,12 @@
 			elements = {
 				freqDisplay: document.getElementById('freq-display'),
 				freqInput: document.getElementById('freq-input'),
-				signalBar: document.getElementById('signal-bar'),
+				signalBarLeft: document.getElementById('signal-bar-left'),
+				signalBarRight: document.getElementById('signal-bar-right'),
 				signalValue: document.getElementById('signal-value'),
 				statusText: document.getElementById('status-text'),
+				headerProgress: document.getElementById('header-progress'),
+				headerProgressFill: document.getElementById('header-progress-fill'),
 				modSelect: document.getElementById('mod-select'),
 				gainSelect: document.getElementById('gain-select'),
 				autogainCheck: document.getElementById('autogain-check'),
@@ -488,16 +571,13 @@
 				// Sweep elements
 				sweepStartBtn: document.getElementById('sweep-start-btn'),
 				sweepMarkBtn: document.getElementById('sweep-mark-btn'),
-				sweepProgressBar: document.getElementById('sweep-progress-bar'),
-				sweepProgressText: document.getElementById('sweep-progress-text'),
 				// Channel elements
 				channelList: document.getElementById('channel-list'),
 				channelActions: document.getElementById('channel-actions'),
 				saveChannelsBtn: document.getElementById('save-channels-btn'),
 				clearChannelsBtn: document.getElementById('clear-channels-btn'),
 				// Manual tuning
-				tuneUp: document.getElementById('tune-up'),
-				tuneDown: document.getElementById('tune-down')
+				manualSaveBtn: document.getElementById('manual-save-btn')
 			};
 
 			setupEventListeners();
@@ -541,11 +621,16 @@
 				elements.sweepStartBtn.textContent = '▶️ Start Sweep';
 				elements.sweepStartBtn.classList.remove('sweeping');
 				elements.sweepMarkBtn.disabled = true;
+				elements.headerProgress.classList.remove('active');
 				setStatus('Stopped');
 			} else {
 				// Clear current marks for fresh sweep
 				markedStations = [];
 				updateChannelListUI();
+				
+				// Show header progress
+				elements.headerProgress.classList.add('active');
+				elements.headerProgressFill.style.width = '0%';
 				
 				// Start audio and sync first
 				setStatus('Starting audio...');
@@ -564,6 +649,7 @@
 				elements.sweepStartBtn.textContent = '▶️ Start Sweep';
 				elements.sweepStartBtn.classList.remove('sweeping');
 				elements.sweepMarkBtn.disabled = true;
+				elements.headerProgress.classList.remove('active');
 			}
 		}
 		
@@ -619,10 +705,9 @@
 				currentSweepFreq = freq;
 				const freqStr = freq.toFixed(1) + 'M';
 				
-				// Update progress
+				// Update progress in header
 				const progress = ((freq - startFreq) / (endFreq - startFreq)) * 100;
-				elements.sweepProgressBar.style.width = progress + '%';
-				elements.sweepProgressText.textContent = freq.toFixed(1) + ' MHz';
+				elements.headerProgressFill.style.width = progress + '%';
 				
 				try {
 					await fetch('/frequency/human/' + freqStr);
@@ -643,8 +728,7 @@
 			}
 			
 			if (!sweepAbort) {
-				elements.sweepProgressBar.style.width = '100%';
-				elements.sweepProgressText.textContent = 'Done';
+				elements.headerProgressFill.style.width = '100%';
 				
 				if (markedStations.length > 0) {
 					setStatus(`${markedStations.length} marked - fine-tuning...`);
@@ -836,6 +920,34 @@
 			setStatus(`${markedStations.length} channels saved!`);
 		}
 		
+		function addCurrentFrequencyToChannels() {
+			const currentMHz = state.freq_i / 1000000;
+			const roundedFreq = Math.round(currentMHz * 10) / 10;
+			
+			// Check if already exists
+			const exists = markedStations.some(s => Math.abs(s.freq - roundedFreq) < 0.05);
+			if (exists) {
+				setStatus(`${roundedFreq.toFixed(1)} MHz already in channels`);
+				return;
+			}
+			
+			// Prompt for name
+			const name = prompt(`Name for ${roundedFreq.toFixed(1)} MHz:`, '');
+			
+			markedStations.push({
+				freq: roundedFreq,
+				signal: state.s_level || 0,
+				name: name || ''
+			});
+			
+			// Sort by frequency
+			markedStations.sort((a, b) => a.freq - b.freq);
+			
+			updateChannelListUI();
+			saveChannelsToStorage();
+			setStatus(`Added ${roundedFreq.toFixed(1)} MHz to channels`);
+		}
+		
 		function loadSavedChannels() {
 			try {
 				const saved = localStorage.getItem('fm_saved_channels');
@@ -920,9 +1032,20 @@
 		// ============ EVENT LISTENERS ============
 		
 		function setupEventListeners() {
-			// Manual tuning buttons
-			elements.tuneUp.addEventListener('click', () => adjustFrequency(0.1));
-			elements.tuneDown.addEventListener('click', () => adjustFrequency(-0.1));
+			// Manual tuning buttons with data-tune attribute
+			document.querySelectorAll('[data-tune]').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const delta = parseFloat(btn.getAttribute('data-tune'));
+					adjustFrequency(delta);
+				});
+			});
+			
+			// Manual save button
+			if (elements.manualSaveBtn) {
+				elements.manualSaveBtn.addEventListener('click', () => {
+					addCurrentFrequencyToChannels();
+				});
+			}
 
 			// Frequency input - enter key or blur
 			if (elements.freqInput) {
@@ -1054,10 +1177,13 @@
 				elements.freqDisplay.textContent = freqMHz;
 			}
 
-			// Signal meter
-			if (elements.signalBar) {
+			// Signal meter (dual bars expanding from center)
+			if (elements.signalBarLeft && elements.signalBarRight) {
 				const level = Math.min(100, state.s_level || 0);
-				elements.signalBar.style.width = level + '%';
+				// Each bar fills up to 50% (half the meter)
+				const barWidth = level / 2;
+				elements.signalBarLeft.style.width = barWidth + '%';
+				elements.signalBarRight.style.width = barWidth + '%';
 			}
 			if (elements.signalValue) {
 				elements.signalValue.textContent = state.s_level || 0;
