@@ -194,7 +194,8 @@
 
 		try {
 			// Call the server-side rtl_power scan
-			const response = await fetch('/scan/fm?start=87.5&end=108&threshold=8');
+			// threshold=6 means 6dB above noise floor
+			const response = await fetch('/scan/fm?start=87.5&end=108&threshold=6');
 			const data = await response.json();
 			
 			if (data.error) {

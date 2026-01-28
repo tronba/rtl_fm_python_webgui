@@ -155,11 +155,11 @@ def web_scan_fm():
 	Query params:
 	  - start: Start frequency in MHz (default 87.5)
 	  - end: End frequency in MHz (default 108.0)
-	  - threshold: dB above noise floor to detect station (default 10)
+	  - threshold: dB above noise floor to detect station (default 6)
 	"""
 	start_mhz = float(request.args.get('start', 87.5))
 	end_mhz = float(request.args.get('end', 108.0))
-	threshold_db = float(request.args.get('threshold', 10))
+	threshold_db = float(request.args.get('threshold', 6))
 	
 	# Convert to Hz for rtl_power
 	start_hz = int(start_mhz * 1e6)
@@ -239,13 +239,14 @@ def web_scan_fm():
 			if power < threshold:
 				continue
 			
-			# Check if local maximum (higher than neighbors)
+			# Check if local maximum (higher than immediate neighbors only)
+			# Use ±50kHz window - just check immediate adjacent bins
 			is_peak = True
-			# Check ±200kHz neighbors (FM stations are 200kHz apart minimum)
-			for j, other_freq in enumerate(sorted_freqs):
+			for other_freq in sorted_freqs:
 				if other_freq == freq:
 					continue
-				if abs(other_freq - freq) < 0.15:  # Within 150kHz
+				# Only check very close neighbors (within 50kHz = ~2 bins)
+				if abs(other_freq - freq) < 0.05:
 					if freq_power[other_freq] > power:
 						is_peak = False
 						break
@@ -256,6 +257,20 @@ def web_scan_fm():
 					'power_db': round(power, 1),
 					'snr': round(power - noise_floor, 1)
 				})
+		
+		# Deduplicate stations that are very close (within 200kHz)
+		# Keep the strongest one in each cluster
+		stations.sort(key=lambda x: x['power_db'], reverse=True)
+		deduped = []
+		for station in stations:
+			too_close = False
+			for existing in deduped:
+				if abs(existing['frequency'] - station['frequency']) < 0.2:
+					too_close = True
+					break
+			if not too_close:
+				deduped.append(station)
+		stations = deduped
 		
 		# Sort by power (strongest first)
 		stations.sort(key=lambda x: x['power_db'], reverse=True)
