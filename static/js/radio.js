@@ -214,6 +214,10 @@
 			console.error('Failed to set scan gain:', err);
 		}
 
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = 'Skanner FM-båndet...';
+		}
+
 		try {
 			// Scan the FM band
 			const scanResults = await performBandScan();
@@ -325,9 +329,9 @@
 		const bottomQuarter = sortedBySignal.slice(0, Math.ceil(sortedBySignal.length / 4));
 		const noiseFloor = Math.round(bottomQuarter.reduce((sum, r) => sum + r.signal, 0) / bottomQuarter.length);
 		
-		// Threshold: noise floor + 50% (must be significantly above noise)
-		const threshold = Math.round(noiseFloor * 1.5);
-		const minSnr = 10;  // Minimum signal-to-noise ratio to be considered a station
+		// Threshold: noise floor + 30%
+		const threshold = Math.round(noiseFloor * 1.3);
+		const minSnr = 5;  // Minimum signal-to-noise ratio to be considered a station
 		console.log('Noise floor:', noiseFloor, 'Threshold:', threshold, 'Min SNR:', minSnr);
 
 		// Phase 3: Find peaks (local maxima above threshold AND minimum SNR)
