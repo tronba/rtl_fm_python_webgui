@@ -171,6 +171,10 @@
 		}
 	}
 
+	function stopScanner() {
+		scannerAbort = true;
+	}
+
 	async function startScanner() {
 		if (scannerRunning) return;
 		
@@ -203,12 +207,15 @@
 		try {
 			const stateResponse = await fetch('/state');
 			previousState = await stateResponse.json();
+			previousState.freq_s = previousState.freq_s; // save frequency too
 			
 			if (elements.scanStatus) {
-				elements.scanStatus.textContent = 'Setter fast forsterkning (gain 28)...';
+				elements.scanStatus.textContent = 'Setter forsterkning (gain 28)...';
 			}
-			await fetch('/gain/28');
+			// Use /gain/human/ which multiplies by 10 (28 -> 280 = 28.0 dB)
+			await fetch('/gain/human/28');
 			await sleep(300);
+			console.log('Set gain to 28 dB for scanning');
 			
 		} catch (err) {
 			console.error('Failed to set scan gain:', err);
@@ -254,16 +261,22 @@
 			}
 		}
 
-		// Restore previous gain state
+		// Restore previous state (gain and frequency)
 		if (previousState) {
 			try {
+				// Restore gain
 				if (previousState.autogain) {
 					await fetch('/gain/auto');
 				} else {
-					await fetch('/gain/' + previousState.gain);
+					// Use /gain/human/ to restore correctly
+					await fetch('/gain/human/' + previousState.gain);
+				}
+				// Restore frequency
+				if (previousState.freq_s) {
+					await fetch('/frequency/human/' + encodeURIComponent(previousState.freq_s));
 				}
 			} catch (err) {
-				console.error('Failed to restore gain:', err);
+				console.error('Failed to restore state:', err);
 			}
 		}
 
@@ -337,7 +350,7 @@
 		
 		// Threshold: noise floor + 30%
 		const threshold = Math.round(noiseFloor * 1.3);
-		const minSnr = 5;  // Minimum signal-to-noise ratio to be considered a station
+		const minSnr = 2;  // Minimum signal-to-noise ratio to be considered a station
 		console.log('Scan results:', {
 			totalSamples: rawResults.length,
 			noiseFloor,
