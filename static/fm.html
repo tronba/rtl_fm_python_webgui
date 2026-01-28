@@ -172,12 +172,13 @@
 		
 		.marked-item {
 			background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-			border: 2px solid #2196F3;
+			border: 2px solid #1565C0;
 			border-radius: 8px;
 			padding: 8px 12px;
 			cursor: pointer;
 			transition: all 0.2s;
 			position: relative;
+			color: #1a237e;
 		}
 		
 		.marked-item:hover {
@@ -191,13 +192,19 @@
 		}
 		
 		.marked-item .freq {
-			font-weight: 600;
+			font-weight: 700;
 			font-size: 16px;
+			color: #0d47a1;
 		}
 		
 		.marked-item .signal {
 			font-size: 12px;
-			opacity: 0.8;
+			color: #1565C0;
+		}
+		
+		.marked-item.tuned .freq,
+		.marked-item.tuned .signal {
+			color: white;
 		}
 		
 		.marked-item .remove-mark {
@@ -319,8 +326,12 @@
 		<div class="marked-stations">
 			<div class="marked-stations-title">
 				<span>Markerte frekvenser (<span id="marked-count">0</span>)</span>
-				<button id="clear-marks-btn" style="display: none;">Tøm alle</button>
+				<div style="display: flex; gap: 8px;">
+					<button id="save-channels-btn" style="display: none; background: #4CAF50;">💾 Lagre</button>
+					<button id="clear-marks-btn" style="display: none;">Tøm alle</button>
+				</div>
 			</div>
+			<div id="saved-indicator" style="display: none; font-size: 12px; color: #4CAF50; margin-bottom: 8px;">✓ Kanaler lagret</div>
 			<div class="marked-list" id="marked-list">
 				<span class="no-marks">Ingen markeringer ennå</span>
 			</div>
@@ -425,6 +436,8 @@
 				markedList: document.getElementById('marked-list'),
 				markedCount: document.getElementById('marked-count'),
 				clearMarksBtn: document.getElementById('clear-marks-btn'),
+				saveChannelsBtn: document.getElementById('save-channels-btn'),
+				savedIndicator: document.getElementById('saved-indicator'),
 				finetuneBtn: document.getElementById('finetune-btn')
 			};
 
@@ -452,11 +465,14 @@
 			// Clear marks
 			elements.clearMarksBtn.addEventListener('click', clearAllMarks);
 			
+			// Save channels button
+			elements.saveChannelsBtn.addEventListener('click', saveChannelsToStorage);
+			
 			// Fine-tune button
 			elements.finetuneBtn.addEventListener('click', finetuneMarkedStations);
 			
-			// Load saved marks from localStorage
-			loadMarkedStations();
+			// Load saved channels from localStorage
+			loadSavedChannels();
 		}
 		
 		function updateSpeedDisplay() {
@@ -473,7 +489,13 @@
 				elements.sweepMarkBtn.disabled = true;
 				elements.sweepStatus.textContent = 'Stoppet';
 			} else {
-				// Start sweep
+				// Start sweep - clear current marks (but saved channels remain until explicitly cleared)
+				markedStations = [];
+				updateMarkedStationsUI();
+				if (elements.savedIndicator) {
+					elements.savedIndicator.style.display = 'none';
+				}
+				
 				sweepRunning = true;
 				sweepAbort = false;
 				elements.sweepStartBtn.textContent = '⏹️ Stopp';
@@ -534,9 +556,16 @@
 			}
 			
 			if (!sweepAbort) {
-				elements.sweepStatus.textContent = 'Ferdig! ' + markedStations.length + ' stasjoner markert.';
 				elements.sweepProgressBar.style.width = '100%';
 				elements.sweepProgressText.textContent = 'Ferdig';
+				
+				// Auto fine-tune if we have marks
+				if (markedStations.length > 0) {
+					elements.sweepStatus.textContent = `${markedStations.length} markert - starter finjustering...`;
+					await finetuneMarkedStations();
+				} else {
+					elements.sweepStatus.textContent = 'Ferdig - ingen stasjoner markert.';
+				}
 			}
 		}
 		
@@ -582,6 +611,7 @@
 		function updateMarkedStationsUI() {
 			elements.markedCount.textContent = markedStations.length;
 			elements.clearMarksBtn.style.display = markedStations.length > 0 ? 'block' : 'none';
+			elements.saveChannelsBtn.style.display = markedStations.length > 0 ? 'block' : 'none';
 			elements.finetuneBtn.disabled = markedStations.length === 0;
 			
 			if (markedStations.length === 0) {
@@ -617,30 +647,41 @@
 		function removeMarkedStation(freq) {
 			markedStations = markedStations.filter(s => s.freq !== freq);
 			updateMarkedStationsUI();
-			saveMarkedStations();
 		}
 		
 		function clearAllMarks() {
-			if (confirm('Fjerne alle markeringer?')) {
+			if (confirm('Fjerne alle markeringer og lagrede kanaler?')) {
 				markedStations = [];
+				localStorage.removeItem('fm_saved_channels');
 				updateMarkedStationsUI();
-				saveMarkedStations();
+				if (elements.savedIndicator) {
+					elements.savedIndicator.style.display = 'none';
+				}
 			}
 		}
 		
-		function saveMarkedStations() {
-			localStorage.setItem('fm_marked_stations', JSON.stringify(markedStations));
+		function saveChannelsToStorage() {
+			localStorage.setItem('fm_saved_channels', JSON.stringify(markedStations));
+			if (elements.savedIndicator) {
+				elements.savedIndicator.style.display = 'block';
+				elements.savedIndicator.textContent = `✓ ${markedStations.length} kanaler lagret`;
+			}
+			elements.sweepStatus.textContent = `${markedStations.length} kanaler lagret!`;
 		}
 		
-		function loadMarkedStations() {
+		function loadSavedChannels() {
 			try {
-				const saved = localStorage.getItem('fm_marked_stations');
+				const saved = localStorage.getItem('fm_saved_channels');
 				if (saved) {
 					markedStations = JSON.parse(saved);
 					updateMarkedStationsUI();
+					if (elements.savedIndicator && markedStations.length > 0) {
+						elements.savedIndicator.style.display = 'block';
+						elements.savedIndicator.textContent = `✓ ${markedStations.length} lagrede kanaler`;
+					}
 				}
 			} catch (e) {
-				console.error('Failed to load saved stations:', e);
+				console.error('Failed to load saved channels:', e);
 			}
 		}
 		
