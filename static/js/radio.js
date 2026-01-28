@@ -351,13 +351,15 @@
 		// Threshold: noise floor + 30%
 		const threshold = Math.round(noiseFloor * 1.3);
 		const minSnr = 2;  // Minimum signal-to-noise ratio to be considered a station
+		const minAbsoluteSignal = 15;  // Minimum absolute signal level to filter noise
 		console.log('Scan results:', {
 			totalSamples: rawResults.length,
 			noiseFloor,
 			maxSignal,
 			maxFreq: maxEntry ? maxEntry.freq : null,
 			threshold,
-			minSnr
+			minSnr,
+			minAbsoluteSignal
 		});
 		
 		// Log top 10 strongest signals for debugging
@@ -370,14 +372,15 @@
 			const current = rawResults[i];
 			const snr = current.signal - noiseFloor;
 			
-			// Must be above threshold AND have minimum SNR
-			if (current.signal < threshold || snr < minSnr) continue;
+			// Must be above threshold, have minimum SNR, AND minimum absolute signal
+			if (current.signal < threshold || snr < minSnr || current.signal < minAbsoluteSignal) continue;
 			
 			// Check if local maximum (higher than immediate neighbors)
+			// Use strictly greater than for prev to handle plateaus - picks first point in plateau
 			const prev = rawResults[i - 1];
 			const next = rawResults[i + 1];
 			
-			const higherThanPrev = !prev || current.signal >= prev.signal;
+			const higherThanPrev = !prev || current.signal > prev.signal;
 			const higherThanNext = !next || current.signal >= next.signal;
 			
 			if (higherThanPrev && higherThanNext) {
