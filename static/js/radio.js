@@ -231,10 +231,12 @@
 					elements.scanStatus.textContent = 'Ingen stasjoner funnet';
 				}
 				if (elements.scanResults) {
+					// Show debug info about what was scanned
 					elements.scanResults.innerHTML = `
 						<div class="scan-results-empty">
 							Ingen stasjoner funnet.<br>
-							<small>Støygulv: ${scanResults.noiseFloor}, Terskel: ${scanResults.threshold}</small><br>
+							<small>Støygulv: ${scanResults.noiseFloor} | Terskel: ${scanResults.threshold}</small><br>
+							<small>Se konsoll (F12) for detaljer</small><br>
 							<small>Prøv å justere antennen.</small>
 						</div>`;
 				}
@@ -329,10 +331,25 @@
 		const bottomQuarter = sortedBySignal.slice(0, Math.ceil(sortedBySignal.length / 4));
 		const noiseFloor = Math.round(bottomQuarter.reduce((sum, r) => sum + r.signal, 0) / bottomQuarter.length);
 		
+		// Find max signal for reference
+		const maxSignal = Math.max(...rawResults.map(r => r.signal));
+		const maxEntry = rawResults.find(r => r.signal === maxSignal);
+		
 		// Threshold: noise floor + 30%
 		const threshold = Math.round(noiseFloor * 1.3);
 		const minSnr = 5;  // Minimum signal-to-noise ratio to be considered a station
-		console.log('Noise floor:', noiseFloor, 'Threshold:', threshold, 'Min SNR:', minSnr);
+		console.log('Scan results:', {
+			totalSamples: rawResults.length,
+			noiseFloor,
+			maxSignal,
+			maxFreq: maxEntry ? maxEntry.freq : null,
+			threshold,
+			minSnr
+		});
+		
+		// Log top 10 strongest signals for debugging
+		const top10 = [...rawResults].sort((a, b) => b.signal - a.signal).slice(0, 10);
+		console.log('Top 10 signals:', top10);
 
 		// Phase 3: Find peaks (local maxima above threshold AND minimum SNR)
 		const peaks = [];
@@ -385,6 +402,9 @@
 		}
 		if (elements.scanProgressText) {
 			elements.scanProgressText.textContent = text + ' (' + percent + '%)';
+		}
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = text;
 		}
 	}
 
