@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -68,6 +68,20 @@
 			100% { transform: scale(1); }
 		}
 		
+		.sweep-btn-finetune {
+			background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+			color: white;
+		}
+		
+		.sweep-btn-finetune:hover {
+			background: linear-gradient(135deg, #7B1FA2, #6A1B9A);
+		}
+		
+		.sweep-btn-finetune:disabled {
+			background: #ccc;
+			cursor: not-allowed;
+		}
+		
 		.sweep-progress {
 			margin-top: 8px;
 		}
@@ -97,237 +111,147 @@
 			font-size: 14px;
 		}
 		
-		/* Speed buttons */
-		.speed-btn-group {
-			display: flex;
-			gap: 8px;
+		.sweep-status {
+			text-align: center;
+			color: #666;
+			font-size: 14px;
 			margin-top: 8px;
 		}
 		
-		.speed-btn {
-			flex: 1;
-			padding: 8px 12px;
-			border: 2px solid #ddd;
-			background: white;
-			border-radius: 6px;
-			cursor: pointer;
-			font-size: 14px;
-			transition: all 0.2s;
-		}
-		
-		.speed-btn.active {
-			border-color: #2196F3;
-			background: #e3f2fd;
-			color: #1565C0;
-			font-weight: 600;
-		}
-		
-		.speed-btn:hover:not(.active) {
-			border-color: #90caf9;
-			background: #f5f5f5;
-		}
-		
-		/* Saved Channels */
-		.channel-list {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-		}
-		
-		.channel-item {
+		.sweep-speed-control {
 			display: flex;
 			align-items: center;
-			gap: 10px;
-			background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-			border: 2px solid #1565C0;
-			border-radius: 8px;
-			padding: 10px 12px;
-			cursor: pointer;
-			transition: all 0.2s;
+			gap: 12px;
+			margin-top: 8px;
 		}
 		
-		.channel-item:hover {
-			background: linear-gradient(135deg, #bbdefb, #90caf9);
-		}
-		
-		.channel-item.playing {
-			background: linear-gradient(135deg, #9C27B0, #7B1FA2);
-			border-color: #9C27B0;
-		}
-		
-		.channel-item .freq {
-			font-weight: 700;
-			font-size: 18px;
-			color: #0d47a1;
-			min-width: 70px;
-		}
-		
-		.channel-item.playing .freq {
-			color: white;
-		}
-		
-		.channel-item .name-input {
-			flex: 1;
-			border: 1px solid #90caf9;
-			border-radius: 4px;
-			padding: 4px 8px;
-			font-size: 14px;
-			background: rgba(255,255,255,0.8);
-		}
-		
-		.channel-item.playing .name-input {
-			background: rgba(255,255,255,0.2);
-			border-color: rgba(255,255,255,0.5);
-			color: white;
-		}
-		
-		.channel-item.playing .name-input::placeholder {
-			color: rgba(255,255,255,0.6);
-		}
-		
-		.channel-item .signal {
-			font-size: 12px;
-			color: #1565C0;
-			min-width: 40px;
-			text-align: right;
-		}
-		
-		.channel-item.playing .signal {
-			color: rgba(255,255,255,0.9);
-		}
-		
-		.channel-item .remove-btn {
-			width: 24px;
-			height: 24px;
-			background: #f44336;
-			color: white;
-			border: none;
-			border-radius: 50%;
-			font-size: 14px;
-			cursor: pointer;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			opacity: 0.7;
-			transition: opacity 0.2s;
-		}
-		
-		.channel-item .remove-btn:hover {
-			opacity: 1;
-		}
-		
-		.no-channels {
-			color: #999;
-			font-style: italic;
-			font-size: 14px;
-			text-align: center;
-			padding: 20px;
-		}
-		
-		.channel-actions {
-			display: flex;
-			gap: 8px;
-			margin-top: 12px;
-		}
-		
-		.channel-actions button {
-			flex: 1;
-			padding: 10px;
-			border: none;
-			border-radius: 6px;
-			cursor: pointer;
-			font-size: 14px;
-			font-weight: 500;
-		}
-		
-		.save-btn {
-			background: #4CAF50;
-			color: white;
-		}
-		
-		.save-btn:hover {
-			background: #45a049;
-		}
-		
-		.clear-btn {
-			background: #f44336;
-			color: white;
-		}
-		
-		.clear-btn:hover {
-			background: #d32f2f;
-		}
-		
-		/* Manual Tuning */
-		.manual-tuning {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-		}
-		
-		.manual-tuning .tune-btn {
-			width: 50px;
-			height: 50px;
-			font-size: 18px;
-			font-weight: bold;
-			border: none;
-			border-radius: 8px;
-			background: linear-gradient(135deg, #607D8B, #546E7A);
-			color: white;
-			cursor: pointer;
-		}
-		
-		.manual-tuning .tune-btn:hover {
-			background: linear-gradient(135deg, #546E7A, #455A64);
-		}
-		
-		.manual-tuning .freq-input {
-			flex: 1;
-			text-align: center;
-			font-size: 20px;
-			padding: 12px;
-			border: 2px solid #ddd;
-			border-radius: 8px;
-		}
-		
-		.manual-tuning .freq-input:focus {
-			border-color: #2196F3;
-			outline: none;
-		}
-		
-		/* Status bar */
-		.status-bar {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 8px 0;
+		.sweep-speed-control label {
 			font-size: 14px;
 			color: #666;
 		}
 		
-		.status-bar .signal-info {
+		.sweep-speed-control input[type="range"] {
+			flex: 1;
+		}
+		
+		.sweep-speed-value {
+			font-size: 14px;
+			font-weight: 600;
+			min-width: 50px;
+		}
+		
+		/* Marked Stations */
+		.marked-stations {
+			margin-top: 16px;
+		}
+		
+		.marked-stations-title {
+			font-size: 14px;
+			color: #666;
+			margin-bottom: 8px;
 			display: flex;
+			justify-content: space-between;
 			align-items: center;
+		}
+		
+		.marked-stations-title button {
+			font-size: 12px;
+			padding: 4px 8px;
+			background: #f44336;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+		
+		.marked-list {
+			display: flex;
+			flex-wrap: wrap;
 			gap: 8px;
 		}
 		
-		.status-bar .signal-mini-bar {
-			width: 60px;
-			height: 8px;
-			background: #e0e0e0;
-			border-radius: 4px;
-			overflow: hidden;
+		.marked-item {
+			background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+			border: 2px solid #1565C0;
+			border-radius: 8px;
+			padding: 8px 12px;
+			cursor: pointer;
+			transition: all 0.2s;
+			position: relative;
+			color: #1a237e;
 		}
 		
-		.status-bar .signal-mini-bar-fill {
-			height: 100%;
-			background: #4CAF50;
-			transition: width 0.3s;
+		.marked-item:hover {
+			background: linear-gradient(135deg, #bbdefb, #90caf9);
+		}
+		
+		.marked-item.tuned {
+			background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+			color: white;
+			border-color: #9C27B0;
+		}
+		
+		.marked-item .freq {
+			font-weight: 700;
+			font-size: 16px;
+			color: #0d47a1;
+		}
+		
+		.marked-item .signal {
+			font-size: 12px;
+			color: #1565C0;
+		}
+		
+		.marked-item.tuned .freq,
+		.marked-item.tuned .signal {
+			color: white;
+		}
+		
+		.marked-item .remove-mark {
+			position: absolute;
+			top: -6px;
+			right: -6px;
+			width: 18px;
+			height: 18px;
+			background: #f44336;
+			color: white;
+			border: none;
+			border-radius: 50%;
+			font-size: 12px;
+			cursor: pointer;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+		}
+		
+		.marked-item:hover .remove-mark {
+			display: flex;
+		}
+		
+		.no-marks {
+			color: #999;
+			font-style: italic;
+			font-size: 14px;
+		}
+		
+		/* Fine-tuning results */
+		.finetune-results {
+			margin-top: 16px;
+			padding: 12px;
+			background: #f5f5f5;
+			border-radius: 8px;
+		}
+		
+		.finetune-results-title {
+			font-size: 14px;
+			font-weight: 600;
+			margin-bottom: 8px;
 		}
 	</style>
 </head>
 <body>
-	<a href="index.html" class="back-btn">← Back</a>
+	<a href="index.html" class="back-btn">← Tilbake</a>
 
 	<div class="header">
 		<h1>📻 FM Radio</h1>
@@ -340,15 +264,32 @@
 			<span class="frequency-value" id="freq-display">---</span>
 			<span class="frequency-unit">MHz</span>
 		</div>
-		<div class="status-bar">
-			<div class="signal-info">
-				<span>Signal:</span>
-				<div class="signal-mini-bar">
-					<div class="signal-mini-bar-fill" id="signal-bar" style="width: 0%"></div>
-				</div>
-				<span id="signal-value">0</span>
+		<div class="signal-meter">
+			<div class="signal-bar-container">
+				<div class="signal-bar" id="signal-bar" style="width: 0%"></div>
 			</div>
-			<span id="status-text">Ready</span>
+			<div class="signal-value">Signal: <span id="signal-value">0</span></div>
+		</div>
+	</div>
+
+	<!-- Tuning Controls -->
+	<div class="card">
+		<div class="card-title">Finjustering</div>
+		<div class="tuning-controls">
+			<div class="tune-btn-group">
+				<button class="tune-btn" data-tune="-1">-1</button>
+				<button class="tune-btn" data-tune="-0.5">-0.5</button>
+				<button class="tune-btn" data-tune="-0.1">-0.1</button>
+			</div>
+			<div class="tune-btn-group">
+				<button class="tune-btn" data-tune="0.1">+0.1</button>
+				<button class="tune-btn" data-tune="0.5">+0.5</button>
+				<button class="tune-btn" data-tune="1">+1</button>
+			</div>
+		</div>
+		<div class="freq-input-group">
+			<input type="text" class="freq-input" id="freq-input" placeholder="F.eks. 99.5M">
+			<button class="set-btn" id="set-freq-btn">Sett</button>
 		</div>
 	</div>
 
@@ -356,13 +297,13 @@
 	<div class="card">
 		<div class="card-title">🔍 Sweep Scanner</div>
 		<p style="font-size: 13px; color: #666; margin-bottom: 12px;">
-			Listen as the scanner sweeps the band. Press "Mark" when you hear a station.
+			Lytt mens scanneren går gjennom båndet. Trykk "Marker" når du hører en stasjon.
 		</p>
 		
 		<div class="sweep-controls">
 			<div class="sweep-btn-row">
 				<button class="sweep-btn sweep-btn-start" id="sweep-start-btn">▶️ Start Sweep</button>
-				<button class="sweep-btn sweep-btn-mark" id="sweep-mark-btn" disabled>⭐ Mark</button>
+				<button class="sweep-btn sweep-btn-mark" id="sweep-mark-btn" disabled>⭐ Marker</button>
 			</div>
 			
 			<div class="sweep-progress">
@@ -372,49 +313,51 @@
 				</div>
 			</div>
 			
-			<div class="speed-btn-group">
-				<button class="speed-btn" data-speed="400">Fast</button>
-				<button class="speed-btn active" data-speed="800">Medium</button>
-				<button class="speed-btn" data-speed="1500">Slow</button>
+			<div class="sweep-status" id="sweep-status">Klar til å skanne</div>
+			
+			<div class="sweep-speed-control">
+				<label>Hastighet:</label>
+				<input type="range" id="sweep-speed" min="300" max="2000" value="800" step="100">
+				<span class="sweep-speed-value" id="sweep-speed-value">0.8s</span>
 			</div>
 		</div>
-	</div>
-
-	<!-- Saved Channels -->
-	<div class="card">
-		<div class="card-title">📻 Channels</div>
-		<div class="channel-list" id="channel-list">
-			<div class="no-channels">No channels saved yet. Run a sweep to find stations!</div>
+		
+		<!-- Marked Stations -->
+		<div class="marked-stations">
+			<div class="marked-stations-title">
+				<span>Markerte frekvenser (<span id="marked-count">0</span>)</span>
+				<div style="display: flex; gap: 8px;">
+					<button id="save-channels-btn" style="display: none; background: #4CAF50;">💾 Lagre</button>
+					<button id="clear-marks-btn" style="display: none;">Tøm alle</button>
+				</div>
+			</div>
+			<div id="saved-indicator" style="display: none; font-size: 12px; color: #4CAF50; margin-bottom: 8px;">✓ Kanaler lagret</div>
+			<div class="marked-list" id="marked-list">
+				<span class="no-marks">Ingen markeringer ennå</span>
+			</div>
 		</div>
-		<div class="channel-actions" id="channel-actions" style="display: none;">
-			<button class="save-btn" id="save-channels-btn">💾 Save</button>
-			<button class="clear-btn" id="clear-channels-btn">🗑️ Clear All</button>
-		</div>
-	</div>
-
-	<!-- Manual Tuning -->
-	<div class="card">
-		<div class="card-title">🎛️ Manual Tuning</div>
-		<div class="manual-tuning">
-			<button class="tune-btn" id="tune-down">−</button>
-			<input type="text" class="freq-input" id="freq-input" placeholder="e.g. 99.5 MHz">
-			<button class="tune-btn" id="tune-up">+</button>
+		
+		<!-- Fine-tune button -->
+		<div style="margin-top: 16px;">
+			<button class="sweep-btn sweep-btn-finetune" id="finetune-btn" disabled>
+				🎯 Finjuster markerte stasjoner
+			</button>
 		</div>
 	</div>
 
 	<!-- Settings -->
 	<div class="card">
-		<div class="card-title">⚙️ Settings</div>
+		<div class="card-title">Innstillinger</div>
 		<div class="settings-row">
 			<div class="setting-group">
-				<label>Modulation</label>
+				<label>Modulasjon</label>
 				<select id="mod-select">
 					<option value="w">WBFM (Stereo)</option>
 					<option value="f">FM (Mono)</option>
 				</select>
 			</div>
 			<div class="setting-group">
-				<label>Gain</label>
+				<label>Forsterkning</label>
 				<select id="gain-select">
 					<option value="auto">Auto</option>
 				</select>
@@ -422,17 +365,17 @@
 		</div>
 		<div class="checkbox-group">
 			<input type="checkbox" id="autogain-check" checked>
-			<label for="autogain-check">Automatic gain control</label>
+			<label for="autogain-check">Automatisk forsterkning</label>
 		</div>
 	</div>
 
 	<!-- Audio Player -->
 	<div class="audio-player">
 		<div class="player-controls">
-			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start Listening</button>
-			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Sync</button>
+			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start lytting</button>
+			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Direkte</button>
 		</div>
-		<div class="player-status" id="player-status">Press Start to listen</div>
+		<div class="player-status" id="player-status">Trykk Start for å lytte</div>
 		<audio id="audio-player" preload="none">
 			<source src="/stream.mp3" type="audio/mpeg">
 		</audio>
@@ -461,10 +404,8 @@
 		let sweepRunning = false;
 		let sweepAbort = false;
 		let currentSweepFreq = 87.5;
-		let sweepSpeed = 800;  // ms per step
-		let markedStations = [];  // Array of {freq, signal, name}
+		let markedStations = [];  // Array of {freq, signal, timestamp}
 		let sweepHistory = [];    // Last N frequencies for latency compensation
-		let currentPlayingFreq = null;
 
 		// DOM Elements
 		let elements = {};
@@ -477,7 +418,6 @@
 				freqInput: document.getElementById('freq-input'),
 				signalBar: document.getElementById('signal-bar'),
 				signalValue: document.getElementById('signal-value'),
-				statusText: document.getElementById('status-text'),
 				modSelect: document.getElementById('mod-select'),
 				gainSelect: document.getElementById('gain-select'),
 				autogainCheck: document.getElementById('autogain-check'),
@@ -490,14 +430,15 @@
 				sweepMarkBtn: document.getElementById('sweep-mark-btn'),
 				sweepProgressBar: document.getElementById('sweep-progress-bar'),
 				sweepProgressText: document.getElementById('sweep-progress-text'),
-				// Channel elements
-				channelList: document.getElementById('channel-list'),
-				channelActions: document.getElementById('channel-actions'),
+				sweepStatus: document.getElementById('sweep-status'),
+				sweepSpeed: document.getElementById('sweep-speed'),
+				sweepSpeedValue: document.getElementById('sweep-speed-value'),
+				markedList: document.getElementById('marked-list'),
+				markedCount: document.getElementById('marked-count'),
+				clearMarksBtn: document.getElementById('clear-marks-btn'),
 				saveChannelsBtn: document.getElementById('save-channels-btn'),
-				clearChannelsBtn: document.getElementById('clear-channels-btn'),
-				// Manual tuning
-				tuneUp: document.getElementById('tune-up'),
-				tuneDown: document.getElementById('tune-down')
+				savedIndicator: document.getElementById('saved-indicator'),
+				finetuneBtn: document.getElementById('finetune-btn')
 			};
 
 			setupEventListeners();
@@ -506,9 +447,6 @@
 			fetchGainList();
 			fetchState();
 			pollInterval = setInterval(fetchState, 500);
-			
-			// Load saved channels
-			loadSavedChannels();
 		}
 
 		// ============ SWEEP SCANNER ============
@@ -520,18 +458,26 @@
 			// Mark button
 			elements.sweepMarkBtn.addEventListener('click', markCurrentFrequency);
 			
-			// Speed buttons
-			document.querySelectorAll('.speed-btn').forEach(btn => {
-				btn.addEventListener('click', () => {
-					document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-					btn.classList.add('active');
-					sweepSpeed = parseInt(btn.dataset.speed);
-				});
-			});
+			// Speed slider
+			elements.sweepSpeed.addEventListener('input', updateSpeedDisplay);
+			updateSpeedDisplay();
 			
-			// Save/Clear buttons
+			// Clear marks
+			elements.clearMarksBtn.addEventListener('click', clearAllMarks);
+			
+			// Save channels button
 			elements.saveChannelsBtn.addEventListener('click', saveChannelsToStorage);
-			elements.clearChannelsBtn.addEventListener('click', clearAllChannels);
+			
+			// Fine-tune button
+			elements.finetuneBtn.addEventListener('click', finetuneMarkedStations);
+			
+			// Load saved channels from localStorage
+			loadSavedChannels();
+		}
+		
+		function updateSpeedDisplay() {
+			const ms = parseInt(elements.sweepSpeed.value);
+			elements.sweepSpeedValue.textContent = (ms / 1000).toFixed(1) + 's';
 		}
 		
 		async function toggleSweep() {
@@ -541,20 +487,18 @@
 				elements.sweepStartBtn.textContent = '▶️ Start Sweep';
 				elements.sweepStartBtn.classList.remove('sweeping');
 				elements.sweepMarkBtn.disabled = true;
-				setStatus('Stopped');
+				elements.sweepStatus.textContent = 'Stoppet';
 			} else {
-				// Clear current marks for fresh sweep
+				// Start sweep - clear current marks (but saved channels remain until explicitly cleared)
 				markedStations = [];
-				updateChannelListUI();
+				updateMarkedStationsUI();
+				if (elements.savedIndicator) {
+					elements.savedIndicator.style.display = 'none';
+				}
 				
-				// Start audio and sync first
-				setStatus('Starting audio...');
-				await startAudioAndSync();
-				
-				// Start sweep
 				sweepRunning = true;
 				sweepAbort = false;
-				elements.sweepStartBtn.textContent = '⏹️ Stop';
+				elements.sweepStartBtn.textContent = '⏹️ Stopp';
 				elements.sweepStartBtn.classList.add('sweeping');
 				elements.sweepMarkBtn.disabled = false;
 				
@@ -567,53 +511,16 @@
 			}
 		}
 		
-		async function startAudioAndSync() {
-			if (!elements.audioPlayer) return;
-			
-			// Start fresh stream
-			const source = elements.audioPlayer.querySelector('source');
-			if (source) {
-				source.src = '/stream.mp3?t=' + Date.now();
-				elements.audioPlayer.load();
-			}
-			
-			try {
-				await elements.audioPlayer.play();
-				updatePlayerUI(true);
-				// Wait a bit for audio to buffer
-				await sleep(500);
-			} catch (err) {
-				console.error('Audio start failed:', err);
-			}
-		}
-		
-		async function syncAudio() {
-			if (!elements.audioPlayer) return;
-			
-			const source = elements.audioPlayer.querySelector('source');
-			if (source) {
-				source.src = '/stream.mp3?t=' + Date.now();
-				elements.audioPlayer.load();
-			}
-			
-			try {
-				await elements.audioPlayer.play();
-				updatePlayerUI(true);
-			} catch (err) {
-				console.error('Audio sync failed:', err);
-			}
-		}
-		
 		async function runSweep() {
 			const startFreq = 87.5;
 			const endFreq = 108.0;
 			const step = 0.1;
-			const historySize = 10;
+			const historySize = 10;  // Keep last 10 frequencies for latency compensation
 			
 			sweepHistory = [];
 			currentSweepFreq = startFreq;
 			
-			setStatus('Scanning...');
+			elements.sweepStatus.textContent = 'Skanner...';
 			
 			for (let freq = startFreq; freq <= endFreq && !sweepAbort; freq += step) {
 				currentSweepFreq = freq;
@@ -624,14 +531,20 @@
 				elements.sweepProgressBar.style.width = progress + '%';
 				elements.sweepProgressText.textContent = freq.toFixed(1) + ' MHz';
 				
+				// Tune to frequency
 				try {
 					await fetch('/frequency/human/' + freqStr);
-					await sleep(sweepSpeed);
 					
+					// Wait for configured time
+					const waitTime = parseInt(elements.sweepSpeed.value);
+					await sleep(waitTime);
+					
+					// Get signal level
 					const response = await fetch('/state');
 					const data = await response.json();
 					const signal = parseInt(data.s_level) || 0;
 					
+					// Add to history for latency compensation
 					sweepHistory.push({ freq, signal, timestamp: Date.now() });
 					if (sweepHistory.length > historySize) {
 						sweepHistory.shift();
@@ -644,57 +557,154 @@
 			
 			if (!sweepAbort) {
 				elements.sweepProgressBar.style.width = '100%';
-				elements.sweepProgressText.textContent = 'Done';
+				elements.sweepProgressText.textContent = 'Ferdig';
 				
+				// Auto fine-tune if we have marks
 				if (markedStations.length > 0) {
-					setStatus(`${markedStations.length} marked - fine-tuning...`);
+					elements.sweepStatus.textContent = `${markedStations.length} markert - starter finjustering...`;
 					await finetuneMarkedStations();
-					setStatus(`Done! ${markedStations.length} stations found.`);
 				} else {
-					setStatus('Done - no stations marked.');
+					elements.sweepStatus.textContent = 'Ferdig - ingen stasjoner markert.';
 				}
 			}
 		}
 		
 		function markCurrentFrequency() {
+			// Use history to compensate for latency - find strongest signal in recent history
 			let bestMark = null;
 			
 			if (sweepHistory.length > 0) {
+				// Find the strongest signal in recent history
 				bestMark = sweepHistory.reduce((best, current) => 
 					current.signal > best.signal ? current : best
 				);
 			} else {
+				// Fallback to current frequency
 				bestMark = { freq: currentSweepFreq, signal: state.s_level };
 			}
 			
 			// Check if already marked (within 0.2 MHz)
 			const existing = markedStations.find(s => Math.abs(s.freq - bestMark.freq) < 0.2);
 			if (existing) {
-				setStatus(`Already marked near ${bestMark.freq.toFixed(1)} MHz`);
+				elements.sweepStatus.textContent = `Allerede markert nær ${bestMark.freq.toFixed(1)} MHz`;
 				return;
 			}
 			
+			// Add mark
 			markedStations.push({
 				freq: bestMark.freq,
 				signal: bestMark.signal,
-				name: ''
+				timestamp: Date.now()
 			});
 			
 			// Visual feedback
 			elements.sweepMarkBtn.classList.add('marked');
 			setTimeout(() => elements.sweepMarkBtn.classList.remove('marked'), 300);
 			
-			setStatus(`Marked: ${bestMark.freq.toFixed(1)} MHz (signal: ${bestMark.signal})`);
-			updateChannelListUI();
+			elements.sweepStatus.textContent = `Markert: ${bestMark.freq.toFixed(1)} MHz (signal: ${bestMark.signal})`;
+			
+			// Update UI
+			updateMarkedStationsUI();
+			saveMarkedStations();
+		}
+		
+		function updateMarkedStationsUI() {
+			elements.markedCount.textContent = markedStations.length;
+			elements.clearMarksBtn.style.display = markedStations.length > 0 ? 'block' : 'none';
+			elements.saveChannelsBtn.style.display = markedStations.length > 0 ? 'block' : 'none';
+			elements.finetuneBtn.disabled = markedStations.length === 0;
+			
+			if (markedStations.length === 0) {
+				elements.markedList.innerHTML = '<span class="no-marks">Ingen markeringer ennå</span>';
+				return;
+			}
+			
+			// Sort by frequency
+			const sorted = [...markedStations].sort((a, b) => a.freq - b.freq);
+			
+			elements.markedList.innerHTML = sorted.map((station, index) => `
+				<div class="marked-item" data-freq="${station.freq}" data-index="${index}">
+					<span class="freq">${station.freq.toFixed(1)}</span>
+					<span class="signal">📶 ${station.signal || '?'}</span>
+					<button class="remove-mark" data-freq="${station.freq}">×</button>
+				</div>
+			`).join('');
+			
+			// Add click handlers
+			elements.markedList.querySelectorAll('.marked-item').forEach(item => {
+				item.addEventListener('click', (e) => {
+					if (e.target.classList.contains('remove-mark')) {
+						const freq = parseFloat(e.target.dataset.freq);
+						removeMarkedStation(freq);
+					} else {
+						const freq = item.dataset.freq;
+						setFrequencyHuman(freq + 'M');
+					}
+				});
+			});
+		}
+		
+		function removeMarkedStation(freq) {
+			markedStations = markedStations.filter(s => s.freq !== freq);
+			updateMarkedStationsUI();
+		}
+		
+		function clearAllMarks() {
+			if (confirm('Fjerne alle markeringer og lagrede kanaler?')) {
+				markedStations = [];
+				localStorage.removeItem('fm_saved_channels');
+				updateMarkedStationsUI();
+				if (elements.savedIndicator) {
+					elements.savedIndicator.style.display = 'none';
+				}
+			}
+		}
+		
+		function saveChannelsToStorage() {
+			localStorage.setItem('fm_saved_channels', JSON.stringify(markedStations));
+			if (elements.savedIndicator) {
+				elements.savedIndicator.style.display = 'block';
+				elements.savedIndicator.textContent = `✓ ${markedStations.length} kanaler lagret`;
+			}
+			elements.sweepStatus.textContent = `${markedStations.length} kanaler lagret!`;
+		}
+		
+		function loadSavedChannels() {
+			try {
+				const saved = localStorage.getItem('fm_saved_channels');
+				if (saved) {
+					markedStations = JSON.parse(saved);
+					updateMarkedStationsUI();
+					if (elements.savedIndicator && markedStations.length > 0) {
+						elements.savedIndicator.style.display = 'block';
+						elements.savedIndicator.textContent = `✓ ${markedStations.length} lagrede kanaler`;
+					}
+				}
+			} catch (e) {
+				console.error('Failed to load saved channels:', e);
+			}
 		}
 		
 		async function finetuneMarkedStations() {
+			if (markedStations.length === 0) return;
+			
+			elements.finetuneBtn.disabled = true;
+			elements.finetuneBtn.textContent = '🎯 Finjusterer...';
+			elements.sweepStatus.textContent = 'Finjusterer markerte stasjoner...';
+			
+			// Stop polling during fine-tune
+			if (pollInterval) {
+				clearInterval(pollInterval);
+				pollInterval = null;
+			}
+			
 			const fineTunedStations = [];
 			
 			for (let i = 0; i < markedStations.length; i++) {
 				const mark = markedStations[i];
-				setStatus(`Fine-tuning ${i + 1}/${markedStations.length}: ${mark.freq.toFixed(1)} MHz`);
+				elements.sweepStatus.textContent = `Finjusterer ${i + 1}/${markedStations.length}: ${mark.freq.toFixed(1)} MHz`;
 				
+				// Scan ±0.3 MHz around the mark in 0.05 MHz steps
 				const scanStart = Math.max(87.5, mark.freq - 0.3);
 				const scanEnd = Math.min(108.0, mark.freq + 0.3);
 				const step = 0.05;
@@ -707,6 +717,7 @@
 						await fetch('/frequency/human/' + freq.toFixed(2) + 'M');
 						await sleep(150);
 						
+						// Take a few samples
 						let totalSignal = 0;
 						for (let s = 0; s < 3; s++) {
 							const response = await fetch('/state');
@@ -725,136 +736,29 @@
 					}
 				}
 				
-				// Round to 0.1 MHz
-				const roundedFreq = Math.round(bestFreq * 10) / 10;
-				
-				// Only add if not already in fineTunedStations (deduplication fix)
-				const alreadyExists = fineTunedStations.find(s => s.freq === roundedFreq);
-				if (!alreadyExists) {
-					fineTunedStations.push({
-						freq: roundedFreq,
-						signal: Math.round(bestSignal),
-						name: mark.name || ''
-					});
-				}
-			}
-			
-			markedStations = fineTunedStations;
-			updateChannelListUI();
-		}
-		
-		function updateChannelListUI() {
-			const hasChannels = markedStations.length > 0;
-			elements.channelActions.style.display = hasChannels ? 'flex' : 'none';
-			
-			if (!hasChannels) {
-				elements.channelList.innerHTML = '<div class="no-channels">No channels saved yet. Run a sweep to find stations!</div>';
-				return;
-			}
-			
-			// Sort by frequency
-			const sorted = [...markedStations].sort((a, b) => a.freq - b.freq);
-			
-			elements.channelList.innerHTML = sorted.map((station, index) => {
-				const isPlaying = currentPlayingFreq === station.freq;
-				return `
-				<div class="channel-item ${isPlaying ? 'playing' : ''}" data-freq="${station.freq}">
-					<span class="freq">${station.freq.toFixed(1)}</span>
-					<input type="text" class="name-input" placeholder="Station name" 
-						value="${station.name || ''}" data-freq="${station.freq}">
-					<span class="signal">📶${station.signal || '?'}</span>
-					<button class="remove-btn" data-freq="${station.freq}">×</button>
-				</div>
-			`}).join('');
-			
-			// Add click handlers
-			elements.channelList.querySelectorAll('.channel-item').forEach(item => {
-				item.addEventListener('click', async (e) => {
-					// Don't trigger if clicking input or remove button
-					if (e.target.classList.contains('name-input') || e.target.classList.contains('remove-btn')) {
-						return;
-					}
-					const freq = parseFloat(item.dataset.freq);
-					await tuneToChannel(freq);
+				fineTunedStations.push({
+					freq: Math.round(bestFreq * 10) / 10,  // Round to 0.1 MHz
+					signal: Math.round(bestSignal),
+					originalFreq: mark.freq
 				});
-			});
-			
-			// Name input handlers
-			elements.channelList.querySelectorAll('.name-input').forEach(input => {
-				input.addEventListener('change', (e) => {
-					const freq = parseFloat(e.target.dataset.freq);
-					const station = markedStations.find(s => s.freq === freq);
-					if (station) {
-						station.name = e.target.value;
-					}
-				});
-				// Prevent click from bubbling to channel item
-				input.addEventListener('click', (e) => e.stopPropagation());
-			});
-			
-			// Remove button handlers
-			elements.channelList.querySelectorAll('.remove-btn').forEach(btn => {
-				btn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					const freq = parseFloat(btn.dataset.freq);
-					removeChannel(freq);
-				});
-			});
-		}
-		
-		async function tuneToChannel(freq) {
-			currentPlayingFreq = freq;
-			updateChannelListUI();
-			setStatus(`Tuning to ${freq.toFixed(1)} MHz...`);
-			
-			await fetch('/frequency/human/' + freq.toFixed(1) + 'M');
-			await syncAudio();
-			
-			setStatus(`Playing ${freq.toFixed(1)} MHz`);
-		}
-		
-		function removeChannel(freq) {
-			markedStations = markedStations.filter(s => s.freq !== freq);
-			if (currentPlayingFreq === freq) {
-				currentPlayingFreq = null;
 			}
-			updateChannelListUI();
-		}
-		
-		function clearAllChannels() {
-			if (confirm('Remove all channels?')) {
-				markedStations = [];
-				currentPlayingFreq = null;
-				localStorage.removeItem('fm_saved_channels');
-				updateChannelListUI();
-				setStatus('Channels cleared');
-			}
-		}
-		
-		function saveChannelsToStorage() {
-			localStorage.setItem('fm_saved_channels', JSON.stringify(markedStations));
-			setStatus(`${markedStations.length} channels saved!`);
-		}
-		
-		function loadSavedChannels() {
-			try {
-				const saved = localStorage.getItem('fm_saved_channels');
-				if (saved) {
-					markedStations = JSON.parse(saved);
-					updateChannelListUI();
-					if (markedStations.length > 0) {
-						setStatus(`${markedStations.length} saved channels loaded`);
-					}
-				}
-			} catch (e) {
-				console.error('Failed to load saved channels:', e);
-			}
-		}
-		
-		function setStatus(text) {
-			if (elements.statusText) {
-				elements.statusText.textContent = text;
-			}
+			
+			// Update marked stations with fine-tuned frequencies
+			markedStations = fineTunedStations.map(s => ({
+				freq: s.freq,
+				signal: s.signal,
+				timestamp: Date.now()
+			}));
+			
+			updateMarkedStationsUI();
+			saveMarkedStations();
+			
+			elements.sweepStatus.textContent = `Ferdig! Finjusterte ${fineTunedStations.length} stasjoner.`;
+			elements.finetuneBtn.textContent = '🎯 Finjuster markerte stasjoner';
+			elements.finetuneBtn.disabled = markedStations.length === 0;
+			
+			// Resume polling
+			pollInterval = setInterval(fetchState, 500);
 		}
 
 		// ============ AUDIO PLAYER ============
@@ -867,7 +771,7 @@
 			}
 
 			if (elements.liveBtn) {
-				elements.liveBtn.addEventListener('click', syncAudio);
+				elements.liveBtn.addEventListener('click', goLive);
 			}
 
 			elements.audioPlayer.addEventListener('play', () => updatePlayerUI(true));
@@ -877,28 +781,43 @@
 				updatePlayerUI(false);
 				showPlayerError();
 			});
-			elements.audioPlayer.addEventListener('waiting', () => showPlayerStatus('Loading...'));
-			elements.audioPlayer.addEventListener('playing', () => showPlayerStatus('Playing live'));
+			elements.audioPlayer.addEventListener('waiting', () => showPlayerStatus('Laster...'));
+			elements.audioPlayer.addEventListener('playing', () => showPlayerStatus('Spiller direkte'));
 		}
 
 		function togglePlayback() {
 			if (!elements.audioPlayer) return;
 			
 			if (elements.audioPlayer.paused) {
-				syncAudio();
+				goLive();
 			} else {
 				elements.audioPlayer.pause();
 			}
 		}
 
+		function goLive() {
+			if (!elements.audioPlayer) return;
+			
+			const source = elements.audioPlayer.querySelector('source');
+			if (source) {
+				source.src = '/stream.mp3?t=' + Date.now();
+				elements.audioPlayer.load();
+			}
+			
+			elements.audioPlayer.play().catch(err => {
+				console.error('Playback failed:', err);
+				showPlayerError();
+			});
+		}
+
 		function updatePlayerUI(playing) {
 			if (elements.playBtn) {
-				elements.playBtn.innerHTML = playing ? '⏹️ Stop' : '▶️ Start Listening';
+				elements.playBtn.innerHTML = playing ? '⏹️ Stopp' : '▶️ Start lytting';
 				elements.playBtn.classList.toggle('playing', playing);
 			}
 			
 			if (elements.playerStatus) {
-				elements.playerStatus.textContent = playing ? 'Playing live' : 'Stopped';
+				elements.playerStatus.textContent = playing ? 'Spiller direkte' : 'Stoppet';
 				elements.playerStatus.classList.toggle('playing', playing);
 				elements.playerStatus.classList.remove('error');
 			}
@@ -912,7 +831,7 @@
 
 		function showPlayerError() {
 			if (elements.playerStatus) {
-				elements.playerStatus.textContent = 'Playback error';
+				elements.playerStatus.textContent = 'Feil ved avspilling';
 				elements.playerStatus.classList.add('error');
 			}
 		}
@@ -920,19 +839,24 @@
 		// ============ EVENT LISTENERS ============
 		
 		function setupEventListeners() {
-			// Manual tuning buttons
-			elements.tuneUp.addEventListener('click', () => adjustFrequency(0.1));
-			elements.tuneDown.addEventListener('click', () => adjustFrequency(-0.1));
+			// Frequency adjustment buttons
+			document.querySelectorAll('[data-tune]').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const delta = parseFloat(btn.dataset.tune);
+					adjustFrequency(delta);
+				});
+			});
 
-			// Frequency input - enter key or blur
+			// Set frequency button
+			const setFreqBtn = document.getElementById('set-freq-btn');
+			if (setFreqBtn) {
+				setFreqBtn.addEventListener('click', setFrequencyFromInput);
+			}
+
+			// Frequency input - enter key
 			if (elements.freqInput) {
 				elements.freqInput.addEventListener('keypress', (e) => {
 					if (e.key === 'Enter') {
-						setFrequencyFromInput();
-					}
-				});
-				elements.freqInput.addEventListener('blur', () => {
-					if (elements.freqInput.value.trim()) {
 						setFrequencyFromInput();
 					}
 				});
@@ -967,6 +891,14 @@
 					}
 				});
 			}
+
+			// Preset buttons
+			document.querySelectorAll('[data-preset]').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const freq = btn.dataset.preset;
+					setFrequencyHuman(freq);
+				});
+			});
 		}
 
 		// ============ API FUNCTIONS ============
@@ -991,11 +923,13 @@
 				.catch(err => console.error('Gain list fetch error:', err));
 		}
 
-		async function setFrequencyHuman(freqStr) {
-			const response = await fetch('/frequency/human/' + encodeURIComponent(freqStr));
-			const data = await response.json();
-			state = data;
-			updateUI();
+		function setFrequencyHuman(freqStr) {
+			fetch('/frequency/human/' + encodeURIComponent(freqStr))
+				.then(res => res.json())
+				.then(data => {
+					state = data;
+					updateUI();
+				});
 		}
 
 		function adjustFrequency(deltaMHz) {
@@ -1007,14 +941,11 @@
 		function setFrequencyFromInput() {
 			if (elements.freqInput && elements.freqInput.value) {
 				let val = elements.freqInput.value.trim();
-				// Handle various input formats
-				val = val.toUpperCase().replace('MHZ', '').replace('M', '').trim();
-				const num = parseFloat(val);
-				if (!isNaN(num) && num >= 87.5 && num <= 108) {
-					setFrequencyHuman(num.toFixed(1) + 'M');
-					elements.freqInput.value = '';
-					elements.freqInput.placeholder = num.toFixed(1) + ' MHz';
+				if (!val.toUpperCase().endsWith('M')) {
+					val += 'M';
 				}
+				setFrequencyHuman(val);
+				elements.freqInput.value = '';
 			}
 		}
 
