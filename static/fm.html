@@ -467,9 +467,8 @@
 			
 			<div class="speed-btn-group">
 				<button class="speed-btn" data-speed="1500">Slow</button>
-				<button class="speed-btn" data-speed="800">Medium</button>
-				<button class="speed-btn active" data-speed="400">Fast</button>
-				<button class="speed-btn" data-speed="200">Turbo</button>
+				<button class="speed-btn active" data-speed="600">Fast</button>
+				<button class="speed-btn" data-speed="300">Turbo</button>
 			</div>
 		</div>
 	</div>
@@ -560,7 +559,7 @@
 		let sweepRunning = false;
 		let sweepAbort = false;
 		let currentSweepFreq = 87.5;
-		let sweepSpeed = 400;  // ms per step (Fast default)
+		let sweepSpeed = 600;  // ms per step (Fast default)
 		let markedStations = [];  // Array of {freq, signal, name}
 		let sweepHistory = [];    // Last N frequencies for latency compensation
 		let currentPlayingFreq = null;
@@ -825,6 +824,12 @@
 				for (let freq = scanStart; freq <= scanEnd; freq += step) {
 					try {
 						await fetch('/frequency/human/' + freq.toFixed(2) + 'M');
+						
+						// Update frequency display during fine-tune
+						if (elements.freqDisplay) {
+							elements.freqDisplay.textContent = freq.toFixed(1);
+						}
+						
 						await sleep(150);
 						
 						let totalSignal = 0;
@@ -1214,13 +1219,18 @@
 		function updateUI() {
 			// Frequency display - show expected freq during sweep (accounting for audio latency)
 			if (elements.freqDisplay) {
+				let displayFreq;
 				if (sweepRunning && sweepHistory.length > 0) {
 					// Show the oldest frequency in history (what user is hearing)
-					const expectedFreq = sweepHistory[0].freq;
-					elements.freqDisplay.textContent = expectedFreq.toFixed(1);
+					displayFreq = sweepHistory[0].freq.toFixed(1);
 				} else {
-					const freqMHz = state.freq_s ? state.freq_s.replace('M', '') : '---';
-					elements.freqDisplay.textContent = freqMHz;
+					displayFreq = state.freq_s ? state.freq_s.replace('M', '') : '---';
+				}
+				elements.freqDisplay.textContent = displayFreq;
+				
+				// Also update the frequency input field
+				if (elements.freqInput && displayFreq !== '---') {
+					elements.freqInput.value = displayFreq;
 				}
 			}
 
