@@ -270,16 +270,27 @@
 		}
 		
 		/* Manual Tuning */
-		.manual-tuning-row {
+		.manual-tuning-wrapper {
 			display: flex;
 			flex-wrap: wrap;
-			align-items: center;
 			justify-content: center;
-			gap: 6px;
+			gap: 8px;
 		}
 		
-		.manual-tuning-row .tune-btn {
-			width: 44px;
+		.tune-group {
+			display: flex;
+			gap: 4px;
+		}
+		
+		.input-group {
+			display: flex;
+			gap: 4px;
+		}
+		
+		.manual-tuning-wrapper .tune-btn {
+			min-width: 38px;
+			max-width: 50px;
+			flex: 1;
 			height: 44px;
 			font-size: 14px;
 			font-weight: bold;
@@ -288,34 +299,31 @@
 			background: linear-gradient(135deg, #607D8B, #546E7A);
 			color: white;
 			cursor: pointer;
-			flex-shrink: 0;
 		}
 		
-		.manual-tuning-row .tune-btn:hover {
+		.manual-tuning-wrapper .tune-btn:hover {
 			background: linear-gradient(135deg, #546E7A, #455A64);
 		}
 		
-		.manual-tuning-row .tune-btn.small {
-			width: 40px;
-		}
-		
-		.manual-tuning-row .freq-input {
-			width: 80px;
-			flex-shrink: 0;
+		.manual-tuning-wrapper .freq-input {
+			width: 70px;
+			height: 44px;
+			box-sizing: border-box;
 			text-align: center;
 			font-size: 16px;
-			padding: 10px 8px;
+			padding: 0 8px;
 			border: 2px solid #ddd;
 			border-radius: 8px;
 		}
 		
-		.manual-tuning-row .freq-input:focus {
+		.manual-tuning-wrapper .freq-input:focus {
 			border-color: #2196F3;
 			outline: none;
 		}
 		
-		.manual-tuning-row .enter-btn {
-			padding: 10px 12px;
+		.manual-tuning-wrapper .enter-btn {
+			height: 44px;
+			padding: 0 12px;
 			background: linear-gradient(135deg, #4CAF50, #45a049);
 			color: white;
 			border: none;
@@ -323,15 +331,15 @@
 			font-size: 14px;
 			font-weight: bold;
 			cursor: pointer;
-			flex-shrink: 0;
 		}
 		
-		.manual-tuning-row .enter-btn:hover {
+		.manual-tuning-wrapper .enter-btn:hover {
 			background: linear-gradient(135deg, #45a049, #388E3C);
 		}
 		
-		.manual-tuning-row .save-text-btn {
-			padding: 10px 14px;
+		.manual-tuning-wrapper .save-text-btn {
+			height: 44px;
+			padding: 0 14px;
 			background: linear-gradient(135deg, #2196F3, #1976D2);
 			color: white;
 			border: none;
@@ -339,10 +347,9 @@
 			font-size: 14px;
 			font-weight: bold;
 			cursor: pointer;
-			flex-shrink: 0;
 		}
 		
-		.manual-tuning-row .save-text-btn:hover {
+		.manual-tuning-wrapper .save-text-btn:hover {
 			background: linear-gradient(135deg, #1976D2, #1565C0);
 		}
 		
@@ -490,16 +497,22 @@
 	<!-- Manual Tuning -->
 	<div class="card">
 		<div class="card-title">🎛️ Manual Tuning</div>
-		<div class="manual-tuning-row">
-			<button class="tune-btn small" data-tune="-1">−1</button>
-			<button class="tune-btn small" data-tune="-0.5">−.5</button>
-			<button class="tune-btn" data-tune="-0.1">−.1</button>
-			<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
-			<button class="enter-btn" id="freq-enter-btn">Go</button>
-			<button class="save-text-btn" id="manual-save-btn">Save</button>
-			<button class="tune-btn" data-tune="0.1">+.1</button>
-			<button class="tune-btn small" data-tune="0.5">+.5</button>
-			<button class="tune-btn small" data-tune="1">+1</button>
+		<div class="manual-tuning-wrapper">
+			<div class="tune-group">
+				<button class="tune-btn" data-tune="-1">−1</button>
+				<button class="tune-btn" data-tune="-0.5">−.5</button>
+				<button class="tune-btn" data-tune="-0.1">−.1</button>
+			</div>
+			<div class="input-group">
+				<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
+				<button class="enter-btn" id="freq-enter-btn">Go</button>
+				<button class="save-text-btn" id="manual-save-btn">Save</button>
+			</div>
+			<div class="tune-group">
+				<button class="tune-btn" data-tune="0.1">+.1</button>
+				<button class="tune-btn" data-tune="0.5">+.5</button>
+				<button class="tune-btn" data-tune="1">+1</button>
+			</div>
 		</div>
 	</div>
 
