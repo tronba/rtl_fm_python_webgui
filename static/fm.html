@@ -328,17 +328,18 @@
 			background: linear-gradient(135deg, #45a049, #388E3C);
 		}
 		
-		.manual-tuning-row .save-icon-btn {
+		.manual-tuning-row .save-text-btn {
 			padding: 10px 14px;
 			background: linear-gradient(135deg, #2196F3, #1976D2);
 			color: white;
 			border: none;
 			border-radius: 8px;
-			font-size: 16px;
+			font-size: 14px;
+			font-weight: bold;
 			cursor: pointer;
 		}
 		
-		.manual-tuning-row .save-icon-btn:hover {
+		.manual-tuning-row .save-text-btn:hover {
 			background: linear-gradient(135deg, #1976D2, #1565C0);
 		}
 		
@@ -489,12 +490,12 @@
 	<div class="card">
 		<div class="card-title">🎛️ Manual Tuning</div>
 		<div class="manual-tuning-row">
-			<button class="save-icon-btn" id="manual-save-btn" title="Save current frequency">💾</button>
 			<button class="tune-btn small" data-tune="-1">−1</button>
 			<button class="tune-btn small" data-tune="-0.5">−.5</button>
 			<button class="tune-btn" data-tune="-0.1">−.1</button>
 			<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
 			<button class="enter-btn" id="freq-enter-btn">Go</button>
+			<button class="save-text-btn" id="manual-save-btn">Save</button>
 			<button class="tune-btn" data-tune="0.1">+.1</button>
 			<button class="tune-btn small" data-tune="0.5">+.5</button>
 			<button class="tune-btn small" data-tune="1">+1</button>
@@ -680,7 +681,13 @@
 		async function startAudioAndSync() {
 			if (!elements.audioPlayer) return;
 			
-			// Start fresh stream
+			// First tune to start frequency BEFORE starting audio
+			setStatus('Tuning to 87.5 MHz...');
+			await fetch('/frequency/human/87.5M');
+			await sleep(300);
+			
+			// Now start fresh stream from current frequency
+			setStatus('Starting audio...');
 			const source = elements.audioPlayer.querySelector('source');
 			if (source) {
 				source.src = '/stream.mp3?t=' + Date.now();
@@ -690,8 +697,9 @@
 			try {
 				await elements.audioPlayer.play();
 				updatePlayerUI(true);
-				// Wait a bit for audio to buffer
-				await sleep(500);
+				// Wait longer for audio to buffer properly
+				setStatus('Buffering audio...');
+				await sleep(1500);
 			} catch (err) {
 				console.error('Audio start failed:', err);
 			}
