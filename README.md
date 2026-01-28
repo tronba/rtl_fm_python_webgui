@@ -1,6 +1,6 @@
 # RTL-SDR Web Radio
 
-A mobile-friendly web interface for RTL-SDR radio reception.
+A mobile-friendly web interface for RTL-SDR radio reception. Still very much in development, only the FM section is kinda done. Will work on the rest as time permits.
 
 ## Why This Fork?
 
