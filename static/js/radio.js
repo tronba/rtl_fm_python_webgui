@@ -385,21 +385,74 @@
 			}
 		}
 
-		// Phase 4: Deduplicate (keep strongest within 0.3 MHz)
+		// Phase 4: Bandwidth verification - real FM stations are ~150kHz wide
+		// Check if signal stays strong ±100kHz around each peak
 		if (elements.scanStatus) {
-			elements.scanStatus.textContent = `Fant ${peaks.length} kandidater, dedupliserer...`;
+			elements.scanStatus.textContent = `Verifiserer ${peaks.length} kandidater...`;
 		}
-		updateScanProgress(90, 'Dedupliserer...');
+		updateScanProgress(82, `Verifiserer ${peaks.length} kandidater`);
 		
-		peaks.sort((a, b) => b.signal - a.signal);
+		const verifiedPeaks = [];
+		for (let i = 0; i < peaks.length && !scannerAbort; i++) {
+			const peak = peaks[i];
+			const progress = 82 + Math.round((i / peaks.length) * 12);
+			updateScanProgress(progress, `Verifiserer ${peak.freq.toFixed(1)} MHz`);
+			
+			// Test bandwidth at ±50kHz and ±100kHz
+			const testOffsets = [-0.1, -0.05, 0.05, 0.1];  // MHz
+			let passCount = 0;
+			const minBandwidthSignal = peak.signal * 0.5;  // Must be at least 50% of peak
+			
+			for (const offset of testOffsets) {
+				const testFreq = peak.freq + offset;
+				if (testFreq < 87.5 || testFreq > 108.0) continue;
+				
+				try {
+					await fetch('/frequency/human/' + testFreq.toFixed(2) + 'M');
+					await sleep(100);
+					
+					const response = await fetch('/state');
+					const data = await response.json();
+					const testSignal = parseInt(data.s_level) || 0;
+					
+					if (testSignal >= minBandwidthSignal) {
+						passCount++;
+					}
+				} catch (err) {
+					console.error('Bandwidth test error:', err);
+				}
+			}
+			
+			// Need at least 3 of 4 test points to pass (real FM station)
+			const bandwidthScore = passCount / testOffsets.length;
+			console.log(`Bandwidth test ${peak.freq.toFixed(1)} MHz: ${passCount}/${testOffsets.length} passed (score: ${bandwidthScore.toFixed(2)})`);
+			
+			if (passCount >= 3) {
+				verifiedPeaks.push({
+					...peak,
+					bandwidthScore
+				});
+			}
+		}
+		
+		console.log(`Bandwidth verification: ${verifiedPeaks.length}/${peaks.length} passed`);
+
+		// Phase 5: Deduplicate (keep strongest within 0.3 MHz)
+		if (elements.scanStatus) {
+			elements.scanStatus.textContent = `${verifiedPeaks.length} verifiserte, dedupliserer...`;
+		}
+		updateScanProgress(95, 'Dedupliserer...');
+		
+		verifiedPeaks.sort((a, b) => b.signal - a.signal);
 		const stations = [];
-		for (const peak of peaks) {
+		for (const peak of verifiedPeaks) {
 			const tooClose = stations.find(s => Math.abs(s.freq - peak.freq) < 0.3);
 			if (!tooClose) {
 				stations.push({
 					frequency: peak.freq,
 					signal: peak.signal,
-					snr: peak.signal - noiseFloor
+					snr: peak.signal - noiseFloor,
+					bandwidthScore: peak.bandwidthScore
 				});
 			}
 		}
