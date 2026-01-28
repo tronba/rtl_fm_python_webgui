@@ -352,7 +352,7 @@
 		.signal-meter {
 			position: relative;
 			height: 32px;
-			background: linear-gradient(90deg, #e0e0e0 0%, #e0e0e0 50%, #e0e0e0 100%);
+			background: white;
 			border-radius: 16px;
 			overflow: hidden;
 			border: 2px solid #ccc;
@@ -1213,10 +1213,16 @@
 		// ============ UI UPDATE ============
 		
 		function updateUI() {
-			// Frequency display
+			// Frequency display - show expected freq during sweep (accounting for audio latency)
 			if (elements.freqDisplay) {
-				const freqMHz = state.freq_s ? state.freq_s.replace('M', '') : '---';
-				elements.freqDisplay.textContent = freqMHz;
+				if (sweepRunning && sweepHistory.length > 0) {
+					// Show the oldest frequency in history (what user is hearing)
+					const expectedFreq = sweepHistory[0].freq;
+					elements.freqDisplay.textContent = expectedFreq.toFixed(1);
+				} else {
+					const freqMHz = state.freq_s ? state.freq_s.replace('M', '') : '---';
+					elements.freqDisplay.textContent = freqMHz;
+				}
 			}
 
 			// Signal meter (dual bars expanding from center, max 700)
