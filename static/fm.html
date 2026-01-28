@@ -216,6 +216,17 @@
 			opacity: 1;
 		}
 		
+		.channel-item.disabled {
+			background: linear-gradient(135deg, #e0e0e0, #ccc);
+			border-color: #999;
+			pointer-events: none;
+			opacity: 0.6;
+		}
+		
+		.channel-item.disabled .freq {
+			color: #666;
+		}
+		
 		.no-channels {
 			color: #999;
 			font-style: italic;
@@ -366,17 +377,23 @@
 			z-index: 2;
 		}
 		
-		.signal-value-display {
-			font-size: 18px;
+		.signal-value-overlay {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 14px;
 			font-weight: 700;
 			color: #333;
-			margin-top: 8px;
+			z-index: 3;
+			text-shadow: 0 0 3px white, 0 0 3px white;
 		}
 		
 		.status-text {
 			font-size: 14px;
 			color: #666;
 			margin-top: 4px;
+			min-height: 20px;
 		}
 		
 		/* Progress bar in header */
@@ -423,8 +440,8 @@
 				<div class="signal-meter-fill-left" id="signal-bar-left"></div>
 				<div class="signal-meter-fill" id="signal-bar-right"></div>
 				<div class="signal-meter-center"></div>
+				<div class="signal-value-overlay" id="signal-value">0</div>
 			</div>
-			<div class="signal-value-display">Signal: <span id="signal-value">0</span></div>
 		</div>
 		<div class="status-text" id="status-text">Ready</div>
 		<div class="header-progress" id="header-progress">
@@ -449,8 +466,9 @@
 			
 			<div class="speed-btn-group">
 				<button class="speed-btn" data-speed="1500">Slow</button>
-				<button class="speed-btn active" data-speed="800">Medium</button>
-				<button class="speed-btn" data-speed="400">Fast</button>
+				<button class="speed-btn" data-speed="800">Medium</button>
+				<button class="speed-btn active" data-speed="400">Fast</button>
+				<button class="speed-btn" data-speed="200">Turbo</button>
 			</div>
 		</div>
 	</div>
@@ -541,10 +559,11 @@
 		let sweepRunning = false;
 		let sweepAbort = false;
 		let currentSweepFreq = 87.5;
-		let sweepSpeed = 800;  // ms per step
+		let sweepSpeed = 400;  // ms per step (Fast default)
 		let markedStations = [];  // Array of {freq, signal, name}
 		let sweepHistory = [];    // Last N frequencies for latency compensation
 		let currentPlayingFreq = null;
+		let channelsDisabled = false;  // Gray out channels during sweep/finetune
 
 		// DOM Elements
 		let elements = {};
@@ -618,14 +637,17 @@
 			if (sweepRunning) {
 				// Stop sweep
 				sweepAbort = true;
+				channelsDisabled = false;
 				elements.sweepStartBtn.textContent = '▶️ Start Sweep';
 				elements.sweepStartBtn.classList.remove('sweeping');
 				elements.sweepMarkBtn.disabled = true;
 				elements.headerProgress.classList.remove('active');
 				setStatus('Stopped');
+				updateChannelListUI();
 			} else {
 				// Clear current marks for fresh sweep
 				markedStations = [];
+				channelsDisabled = true;
 				updateChannelListUI();
 				
 				// Show header progress
@@ -646,10 +668,12 @@
 				await runSweep();
 				
 				sweepRunning = false;
+				channelsDisabled = false;
 				elements.sweepStartBtn.textContent = '▶️ Start Sweep';
 				elements.sweepStartBtn.classList.remove('sweeping');
 				elements.sweepMarkBtn.disabled = true;
 				elements.headerProgress.classList.remove('active');
+				updateChannelListUI();
 			}
 		}
 		
@@ -732,6 +756,8 @@
 				
 				if (markedStations.length > 0) {
 					setStatus(`${markedStations.length} marked - fine-tuning...`);
+					// Gray out mark button during fine-tune
+					elements.sweepMarkBtn.disabled = true;
 					await finetuneMarkedStations();
 					setStatus(`Done! ${markedStations.length} stations found.`);
 				} else {
@@ -841,27 +867,30 @@
 			
 			elements.channelList.innerHTML = sorted.map((station, index) => {
 				const isPlaying = currentPlayingFreq === station.freq;
+				const disabledClass = channelsDisabled ? 'disabled' : '';
 				return `
-				<div class="channel-item ${isPlaying ? 'playing' : ''}" data-freq="${station.freq}">
+				<div class="channel-item ${isPlaying ? 'playing' : ''} ${disabledClass}" data-freq="${station.freq}">
 					<span class="freq">${station.freq.toFixed(1)}</span>
 					<input type="text" class="name-input" placeholder="Station name" 
-						value="${station.name || ''}" data-freq="${station.freq}">
+						value="${station.name || ''}" data-freq="${station.freq}" ${channelsDisabled ? 'disabled' : ''}>
 					<span class="signal">📶${station.signal || '?'}</span>
-					<button class="remove-btn" data-freq="${station.freq}">×</button>
+					<button class="remove-btn" data-freq="${station.freq}" ${channelsDisabled ? 'disabled' : ''}>×</button>
 				</div>
 			`}).join('');
 			
-			// Add click handlers
-			elements.channelList.querySelectorAll('.channel-item').forEach(item => {
-				item.addEventListener('click', async (e) => {
-					// Don't trigger if clicking input or remove button
-					if (e.target.classList.contains('name-input') || e.target.classList.contains('remove-btn')) {
-						return;
-					}
-					const freq = parseFloat(item.dataset.freq);
-					await tuneToChannel(freq);
+			// Add click handlers (only when not disabled)
+			if (!channelsDisabled) {
+				elements.channelList.querySelectorAll('.channel-item').forEach(item => {
+					item.addEventListener('click', async (e) => {
+						// Don't trigger if clicking input or remove button
+						if (e.target.classList.contains('name-input') || e.target.classList.contains('remove-btn')) {
+							return;
+						}
+						const freq = parseFloat(item.dataset.freq);
+						await tuneToChannel(freq);
+					});
 				});
-			});
+			}
 			
 			// Name input handlers
 			elements.channelList.querySelectorAll('.name-input').forEach(input => {
@@ -1177,9 +1206,10 @@
 				elements.freqDisplay.textContent = freqMHz;
 			}
 
-			// Signal meter (dual bars expanding from center)
+			// Signal meter (dual bars expanding from center, max 700)
 			if (elements.signalBarLeft && elements.signalBarRight) {
-				const level = Math.min(100, state.s_level || 0);
+				const rawLevel = state.s_level || 0;
+				const level = Math.min(100, (rawLevel / 700) * 100);
 				// Each bar fills up to 50% (half the meter)
 				const barWidth = level / 2;
 				elements.signalBarLeft.style.width = barWidth + '%';
