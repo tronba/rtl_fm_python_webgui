@@ -274,22 +274,49 @@
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: center;
+			align-items: center;
 			gap: 8px;
 		}
 		
-		.tune-buttons-group {
+		.tune-left, .tune-right {
 			display: flex;
 			gap: 4px;
-			flex: 1;
-			min-width: 280px;
+		}
+		
+		.tune-buttons-row {
+			display: flex;
+			gap: 4px;
+			flex: 1 1 280px;
 			max-width: 500px;
 			justify-content: center;
+			order: 2;
 		}
 		
 		.input-group {
 			display: flex;
 			gap: 4px;
 			justify-content: center;
+			order: 1;
+			flex: 0 0 auto;
+		}
+		
+		/* On wide screens, show inline with input in middle */
+		@media (min-width: 550px) {
+			.manual-tuning-wrapper {
+				flex-wrap: nowrap;
+			}
+			.tune-buttons-row {
+				display: contents;
+			}
+			.tune-left {
+				order: 1;
+			}
+			.input-group {
+				order: 2;
+			}
+			.tune-right {
+				order: 3;
+			}
 		}
 		
 		.manual-tuning-wrapper .tune-btn {
@@ -508,13 +535,17 @@
 				<button class="enter-btn" id="freq-enter-btn">Go</button>
 				<button class="save-text-btn" id="manual-save-btn">Save</button>
 			</div>
-			<div class="tune-buttons-group">
-				<button class="tune-btn" data-tune="-1">−1</button>
-				<button class="tune-btn" data-tune="-0.5">−.5</button>
-				<button class="tune-btn" data-tune="-0.1">−.1</button>
-				<button class="tune-btn" data-tune="0.1">+.1</button>
-				<button class="tune-btn" data-tune="0.5">+.5</button>
-				<button class="tune-btn" data-tune="1">+1</button>
+			<div class="tune-buttons-row">
+				<div class="tune-left">
+					<button class="tune-btn" data-tune="-1">−1</button>
+					<button class="tune-btn" data-tune="-0.5">−.5</button>
+					<button class="tune-btn" data-tune="-0.1">−.1</button>
+				</div>
+				<div class="tune-right">
+					<button class="tune-btn" data-tune="0.1">+.1</button>
+					<button class="tune-btn" data-tune="0.5">+.5</button>
+					<button class="tune-btn" data-tune="1">+1</button>
+				</div>
 			</div>
 		</div>
 	</div>
