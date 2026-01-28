@@ -270,14 +270,26 @@
 		}
 		
 		/* Manual Tuning */
-		.manual-tuning-row {
+		.manual-tuning-container {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		
+		.manual-tuning-input-row {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 6px;
+		}
+		
+		.manual-tuning-buttons-row {
 			display: flex;
 			align-items: center;
 			gap: 6px;
-			margin-bottom: 12px;
 		}
 		
-		.manual-tuning-row .tune-btn {
+		.manual-tuning-buttons-row .tune-btn {
 			flex: 1;
 			min-width: 40px;
 			height: 44px;
@@ -290,15 +302,15 @@
 			cursor: pointer;
 		}
 		
-		.manual-tuning-row .tune-btn:hover {
+		.manual-tuning-buttons-row .tune-btn:hover {
 			background: linear-gradient(135deg, #546E7A, #455A64);
 		}
 		
-		.manual-tuning-row .tune-btn.small {
+		.manual-tuning-buttons-row .tune-btn.small {
 			flex: 0.7;
 		}
 		
-		.manual-tuning-row .freq-input {
+		.manual-tuning-input-row .freq-input {
 			width: 80px;
 			flex-shrink: 0;
 			text-align: center;
@@ -308,12 +320,12 @@
 			border-radius: 8px;
 		}
 		
-		.manual-tuning-row .freq-input:focus {
+		.manual-tuning-input-row .freq-input:focus {
 			border-color: #2196F3;
 			outline: none;
 		}
 		
-		.manual-tuning-row .enter-btn {
+		.manual-tuning-input-row .enter-btn {
 			padding: 10px 12px;
 			background: linear-gradient(135deg, #4CAF50, #45a049);
 			color: white;
@@ -324,11 +336,11 @@
 			cursor: pointer;
 		}
 		
-		.manual-tuning-row .enter-btn:hover {
+		.manual-tuning-input-row .enter-btn:hover {
 			background: linear-gradient(135deg, #45a049, #388E3C);
 		}
 		
-		.manual-tuning-row .save-text-btn {
+		.manual-tuning-input-row .save-text-btn {
 			padding: 10px 14px;
 			background: linear-gradient(135deg, #2196F3, #1976D2);
 			color: white;
@@ -339,7 +351,7 @@
 			cursor: pointer;
 		}
 		
-		.manual-tuning-row .save-text-btn:hover {
+		.manual-tuning-input-row .save-text-btn:hover {
 			background: linear-gradient(135deg, #1976D2, #1565C0);
 		}
 		
@@ -487,16 +499,20 @@
 	<!-- Manual Tuning -->
 	<div class="card">
 		<div class="card-title">🎛️ Manual Tuning</div>
-		<div class="manual-tuning-row">
-			<button class="tune-btn small" data-tune="-1">−1</button>
-			<button class="tune-btn small" data-tune="-0.5">−.5</button>
-			<button class="tune-btn" data-tune="-0.1">−.1</button>
-			<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
-			<button class="enter-btn" id="freq-enter-btn">Go</button>
-			<button class="save-text-btn" id="manual-save-btn">Save</button>
-			<button class="tune-btn" data-tune="0.1">+.1</button>
-			<button class="tune-btn small" data-tune="0.5">+.5</button>
-			<button class="tune-btn small" data-tune="1">+1</button>
+		<div class="manual-tuning-container">
+			<div class="manual-tuning-input-row">
+				<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
+				<button class="enter-btn" id="freq-enter-btn">Go</button>
+				<button class="save-text-btn" id="manual-save-btn">Save</button>
+			</div>
+			<div class="manual-tuning-buttons-row">
+				<button class="tune-btn small" data-tune="-1">−1</button>
+				<button class="tune-btn small" data-tune="-0.5">−.5</button>
+				<button class="tune-btn" data-tune="-0.1">−.1</button>
+				<button class="tune-btn" data-tune="0.1">+.1</button>
+				<button class="tune-btn small" data-tune="0.5">+.5</button>
+				<button class="tune-btn small" data-tune="1">+1</button>
+			</div>
 		</div>
 	</div>
 
