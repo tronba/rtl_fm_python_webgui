@@ -776,15 +776,47 @@
 
 	// Theme helpers - allows previewing without HTML changes
 	function setTheme(theme) {
-	document.body.classList.remove('theme-glass');
+		// normalize
+		theme = String(theme || 'glass');
+		// remove existing theme classes
+		document.body.classList.remove('theme-glass');
+		if (theme === 'glass') {
+			document.body.classList.add('theme-glass');
+		}
 		try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
+		updateThemeIndicator(theme);
 	}
 
 	function applyThemeFromStorage() {
 		try {
-		const allowed = ['glass'];
-		let theme = localStorage.getItem('theme');
-		if (!allowed.includes(theme)) theme = 'glass';
+			const allowed = ['glass'];
+			let theme = localStorage.getItem('theme');
+			if (!allowed.includes(theme)) theme = 'glass';
+			setTheme(theme);
+		} catch (e) { /* ignore */ }
+	}
+
+	function updateThemeIndicator(theme) {
+		try {
+			let el = document.getElementById('theme-indicator');
+			if (!el) {
+				el = document.createElement('div');
+				el.id = 'theme-indicator';
+				el.style.position = 'fixed';
+				el.style.top = '12px';
+				el.style.right = '12px';
+				el.style.zIndex = '9999';
+				el.style.padding = '6px 10px';
+				el.style.borderRadius = '999px';
+				el.style.background = 'rgba(0,0,0,0.6)';
+				el.style.color = '#fff';
+				el.style.fontWeight = '700';
+				el.style.fontSize = '0.85rem';
+				document.body.appendChild(el);
+			}
+			const accent = getComputedStyle(document.body).getPropertyValue('--accent') || '(no accent)';
+			el.textContent = 'Theme: ' + theme + ' | accent: ' + accent.trim();
+		} catch (e) { /* ignore */ }
 	}
 
 	// Expose functions globally for inline onclick handlers if needed
