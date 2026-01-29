@@ -66,8 +66,9 @@
 
 		// Setup scanner
 		setupScanner();
-	}
 
+	// Apply persisted theme (default: glass) for quick preview
+	applyThemeFromStorage();
 	function setupAudioPlayer() {
 		if (!elements.audioPlayer) return;
 
@@ -773,6 +774,20 @@
 		}
 	}
 
+	// Theme helpers - allows previewing without HTML changes
+	function setTheme(theme) {
+		document.body.classList.remove('theme-glass','theme-emergency');
+		document.body.classList.add('theme-' + theme);
+		try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
+	}
+
+	function applyThemeFromStorage() {
+		try {
+			const theme = localStorage.getItem('theme') || 'glass';
+			setTheme(theme);
+		} catch (e) { /* ignore */ }
+	}
+
 	// Expose functions globally for inline onclick handlers if needed
 	window.radioAPI = {
 		setFrequency,
@@ -785,7 +800,9 @@
 		togglePlayback,
 		goLive,
 		startScanner,
-		stopScanner
+		stopScanner,
+		// theme helpers for debugging or user toggle
+		setTheme
 	};
 
 })();
