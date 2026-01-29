@@ -776,16 +776,15 @@
 
 	// Theme helpers - allows previewing without HTML changes
 	function setTheme(theme) {
-		document.body.classList.remove('theme-glass','theme-emergency');
-		document.body.classList.add('theme-' + theme);
+	document.body.classList.remove('theme-glass');
 		try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
 	}
 
 	function applyThemeFromStorage() {
 		try {
-			const theme = localStorage.getItem('theme') || 'glass';
-			setTheme(theme);
-		} catch (e) { /* ignore */ }
+		const allowed = ['glass'];
+		let theme = localStorage.getItem('theme');
+		if (!allowed.includes(theme)) theme = 'glass';
 	}
 
 	// Expose functions globally for inline onclick handlers if needed
