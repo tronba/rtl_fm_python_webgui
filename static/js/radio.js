@@ -21,6 +21,9 @@
 
 	// DOM Elements (cached on init)
 	let elements = {};
+	// Support interactive marking during FM sweep (fm.html uses sweep-start/sweep-mark controls)
+	let markedDuringScan = []; // frequencies user marked while scanning
+
 
 	// Initialize when DOM is ready
 	document.addEventListener('DOMContentLoaded', init);
@@ -50,6 +53,9 @@
 			scanProgressText: document.getElementById('scan-progress-text'),
 			scanResults: document.getElementById('scan-results')
 		};
+
+		// Normalize FM page elements (fm.html has different IDs/classes)
+		normalizeFMElements();
 
 		// Setup event listeners
 		setupEventListeners();
@@ -161,6 +167,23 @@
 	function setupScanner() {
 		if (elements.scanBtn) {
 			elements.scanBtn.addEventListener('click', toggleScanner);
+		}
+		// FM page: if there's a sweep-mark button, wire it to allow marking during scans
+		if (!elements.scanMarkBtn) {
+			const sweepMark = document.getElementById('sweep-mark-btn');
+			if (sweepMark) {
+				elements.scanMarkBtn = sweepMark;
+			}
+		}
+		if (elements.scanMarkBtn) {
+			elements.scanMarkBtn.addEventListener('click', () => {
+				if (scannerRunning) {
+					markDuringScan();
+				} else {
+					// If not scanning, give a small feedback
+					if (elements.scanStatus) elements.scanStatus.textContent = 'Mark only available during sweep';
+				}
+			});
 		}
 	}
 
@@ -362,6 +385,54 @@
 			minSnr,
 			minAbsoluteSignal
 		});
+
+		// If the user marked frequencies during an interactive sweep, fine-tune those instead
+		if (markedDuringScan && markedDuringScan.length > 0) {
+			if (elements.scanStatus) elements.scanStatus.textContent = `Verifying ${markedDuringScan.length} marked stations...`;
+			updateScanProgress(82, `Verifiserer ${markedDuringScan.length} kandidater`);
+			const verified = [];
+			for (let i = 0; i < markedDuringScan.length && !scannerAbort; i++) {
+				const center = markedDuringScan[i];
+				let bestFreq = center;
+				let bestSignal = 0;
+				const scanStart = Math.max(startFreq, center - 0.3);
+				const scanEnd = Math.min(endFreq, center + 0.3);
+				let steps = 0;
+				for (let f = scanStart; f <= scanEnd && !scannerAbort; f += 0.05) {
+					steps++;
+					try {
+						await fetch('/frequency/human/' + f.toFixed(2) + 'M');
+						await sleep(100);
+						let total = 0;
+						for (let s = 0; s < 3; s++) {
+							const r = await fetch('/state');
+							const d = await r.json();
+							total += parseInt(d.s_level) || 0;
+							if (s < 2) await sleep(30);
+						}
+						const avg = total / 3;
+						if (avg > bestSignal) { bestSignal = avg; bestFreq = f; }
+					} catch (e) {
+						console.error('Fine-tune error:', e);
+					}
+				}
+				const roundedFreq = Math.round(bestFreq * 10) / 10;
+				verified.push({ frequency: roundedFreq, signal: Math.round(bestSignal), snr: Math.round(bestSignal - noiseFloor) });
+				updateScanProgress(82 + Math.round(((i+1)/markedDuringScan.length) * 12), `Verifiserer ${roundedFreq.toFixed(1)} MHz`);
+			}
+			// Deduplicate by closeness
+			verified.sort((a,b) => b.signal - a.signal);
+			const stations = [];
+			for (const p of verified) {
+				const tooClose = stations.find(s => Math.abs(s.frequency - p.frequency) < 0.3);
+				if (!tooClose) stations.push(p);
+			}
+			// clear markedDuringScan
+			markedDuringScan = [];
+			updateScanProgress(100, 'Ferdig');
+			return { stations, noiseFloor, threshold };
+		}
+
 		
 		// Log top 10 strongest signals for debugging
 		const top10 = [...rawResults].sort((a, b) => b.signal - a.signal).slice(0, 10);
@@ -475,6 +546,25 @@
 		}
 		if (elements.scanStatus) {
 			elements.scanStatus.textContent = text;
+		}
+	}
+
+	// Marking support during human sweep: save user's marked freq to be fine-tuned after scan
+	async function markDuringScan() {
+		try {
+			const res = await fetch('/state');
+			const data = await res.json();
+			let freqStr = data.freq_s || '';
+			freqStr = freqStr.replace(/M/i, '').trim();
+			const f = parseFloat(freqStr);
+			if (!isNaN(f)) {
+				markedDuringScan.push(f);
+				if (elements.scanStatus) {
+					elements.scanStatus.textContent = `Marked ${f.toFixed(1)} MHz`;
+				}
+			}
+		} catch (e) {
+			console.error('Mark failed:', e);
 		}
 	}
 
@@ -592,6 +682,30 @@
 			elements.squelchSlider.addEventListener('change', () => {
 				setSquelch(parseInt(elements.squelchSlider.value));
 			});
+		}
+	}
+
+	// Normalize FM page-specific elements to the shared element keys
+	function normalizeFMElements() {
+		// Split signal-meter on fm.html
+		const left = document.getElementById('signal-bar-left');
+		if (left) {
+			elements.signalBarLeft = left;
+			elements.signalBarRight = document.getElementById('signal-bar-right');
+			elements.signalValue = document.getElementById('signal-value') || elements.signalValue;
+		}
+
+		// Sweep scanner elements (fm.html uses 'sweep-*' IDs)
+		const sweepStart = document.getElementById('sweep-start-btn');
+		if (sweepStart) {
+			elements.scanBtn = sweepStart;
+			elements.scanMarkBtn = document.getElementById('sweep-mark-btn');
+			elements.scanProgressContainer = document.getElementById('sweep-progress-container') || document.getElementById('header-progress') || elements.scanProgressContainer;
+			elements.scanProgressBar = document.getElementById('sweep-progress-bar') || document.getElementById('header-progress-fill') || elements.scanProgressBar;
+			elements.scanProgressText = document.getElementById('sweep-progress-text') || elements.scanProgressText;
+			elements.scanStatus = document.getElementById('scan-status') || document.getElementById('status-text') || elements.scanStatus;
+			elements.scanResults = document.getElementById('scan-results') || document.getElementById('scan-results') || elements.scanResults;
+			elements.channelList = document.getElementById('channel-list') || elements.channelList;
 		}
 	}
 
