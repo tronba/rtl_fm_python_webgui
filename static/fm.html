@@ -665,6 +665,10 @@
 			
 			// Load saved channels
 			loadSavedChannels();
+
+			// Apply Glass theme so this page matches other pages (persist for consistency)
+			try { localStorage.setItem('theme','glass'); } catch (e) {}
+			document.body.classList.add('theme-glass');
 		}
 
 		// ============ SWEEP SCANNER ============
