@@ -73,8 +73,10 @@
 		// Setup scanner
 		setupScanner();
 
-	// Apply persisted theme (default: glass) for quick preview
-	applyThemeFromStorage();
+		// Apply persisted theme (default: glass) for quick preview
+		applyThemeFromStorage();
+	}
+
 	function setupAudioPlayer() {
 		if (!elements.audioPlayer) return;
 
