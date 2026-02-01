@@ -840,6 +840,13 @@
 			elements.squelchValue.textContent = state.squelch || 0;
 		}
 
+		// Update squelch threshold overlay on signal meter
+		const squelchThreshold = document.getElementById('squelch-threshold');
+		if (squelchThreshold) {
+			const squelchPercent = Math.min(100, ((state.squelch || 0) / 500) * 100);
+			squelchThreshold.style.left = squelchPercent + '%';
+		}
+
 		// Update preset buttons active state
 		updatePresetButtons();
 	}
