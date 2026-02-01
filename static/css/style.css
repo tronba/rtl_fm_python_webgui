@@ -140,12 +140,9 @@ body {
 }
 
 .signal-value {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
 	margin-top: 6px;
 	font-size: 0.875rem;
-	gap: 8px;
+	color: var(--text-secondary);
 }
 
 .signal-value span {
