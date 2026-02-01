@@ -148,29 +148,32 @@ body {
 
 .squelch-control-inline {
 	display: flex;
-	align-items: center;
-	gap: 12px;
+	flex-direction: column;
+	gap: 4px;
 	margin-top: 12px;
 	padding-top: 12px;
 	border-top: 1px solid var(--bg-secondary);
 }
 
+.squelch-control-inline input[type="range"] {
+	width: 100%;
+}
+
+.squelch-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
 .squelch-control-inline label {
 	font-size: 0.875rem;
 	color: var(--text-secondary);
-	margin-left: auto;
-}
-
-.squelch-control-inline input[type="range"] {
-	flex: 1;
 }
 
 .squelch-control-inline .squelch-value {
 	font-size: 0.875rem;
 	font-weight: 600;
 	color: var(--accent);
-	min-width: 35px;
-	text-align: right;
 }
 
 /* Tuning Controls */
