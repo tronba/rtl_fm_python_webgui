@@ -843,9 +843,8 @@
 		// Update squelch threshold overlay on signal meter
 		const squelchThreshold = document.getElementById('squelch-threshold');
 		if (squelchThreshold) {
-			// Slider max is 500, signal meter scales to 300 (level/3 = 100%)
-			// So map slider position to same visual scale: (squelch/500) * 100%
-			const squelchPercent = Math.min(100, ((state.squelch || 0) / 500) * 100);
+			// Use same scale as signal bar (level/3) so they align
+			const squelchPercent = Math.min(100, (state.squelch || 0) / 3);
 			squelchThreshold.style.left = squelchPercent + '%';
 		}
 
