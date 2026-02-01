@@ -848,35 +848,36 @@ body.theme-glass {
 }
 
 .sweep-btn-start {
-	background: linear-gradient(135deg, #4CAF50, #45a049);
+	background: var(--success);
 	color: white;
 }
 
 .sweep-btn-start:hover {
-	background: linear-gradient(135deg, #45a049, #3d8b40);
+	background: color-mix(in srgb, var(--success) 90%, black);
 }
 
 .sweep-btn-start.sweeping {
-	background: linear-gradient(135deg, #f44336, #d32f2f);
+	background: var(--danger);
 }
 
 .sweep-btn-mark {
-	background: linear-gradient(135deg, #2196F3, #1976D2);
+	background: var(--accent);
 	color: white;
 	font-size: 18px;
 }
 
 .sweep-btn-mark:hover {
-	background: linear-gradient(135deg, #1976D2, #1565C0);
+	background: var(--accent-hover);
 }
 
 .sweep-btn-mark:disabled {
-	background: #ccc;
+	background: var(--text-secondary);
 	cursor: not-allowed;
+	opacity: 0.5;
 }
 
 .sweep-btn-mark.marked {
-	background: linear-gradient(135deg, #4CAF50, #45a049);
+	background: var(--success);
 	animation: pulse-mark 0.3s ease;
 }
 
@@ -892,7 +893,7 @@ body.theme-glass {
 
 .sweep-progress-bar-container {
 	height: 24px;
-	background: #e0e0e0;
+	background: var(--bg-secondary);
 	border-radius: 12px;
 	overflow: hidden;
 	position: relative;
@@ -900,7 +901,7 @@ body.theme-glass {
 
 .sweep-progress-bar {
 	height: 100%;
-	background: linear-gradient(90deg, #4CAF50, #8BC34A);
+	background: var(--success);
 	transition: width 0.3s ease;
 	border-radius: 12px;
 }
@@ -911,7 +912,7 @@ body.theme-glass {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	font-weight: 600;
-	color: #333;
+	color: var(--text-primary);
 	font-size: 14px;
 }
 
@@ -925,8 +926,9 @@ body.theme-glass {
 .speed-btn {
 	flex: 1;
 	padding: 8px 12px;
-	border: 2px solid #ddd;
-	background: white;
+	border: 2px solid var(--bg-secondary);
+	background: var(--bg-card);
+	color: var(--text-primary);
 	border-radius: 6px;
 	cursor: pointer;
 	font-size: 14px;
@@ -934,15 +936,15 @@ body.theme-glass {
 }
 
 .speed-btn.active {
-	border-color: #2196F3;
-	background: #e3f2fd;
-	color: #1565C0;
+	border-color: var(--accent);
+	background: color-mix(in srgb, var(--accent) 20%, var(--bg-card));
+	color: var(--accent);
 	font-weight: 600;
 }
 
 .speed-btn:hover:not(.active) {
-	border-color: #90caf9;
-	background: #f5f5f5;
+	border-color: var(--accent);
+	background: var(--bg-secondary);
 }
 
 /* Saved Channels */
@@ -956,8 +958,8 @@ body.theme-glass {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-	border: 2px solid #1565C0;
+	background: var(--bg-secondary);
+	border: 2px solid var(--accent);
 	border-radius: 8px;
 	padding: 10px 12px;
 	cursor: pointer;
@@ -965,18 +967,18 @@ body.theme-glass {
 }
 
 .channel-item:hover {
-	background: linear-gradient(135deg, #bbdefb, #90caf9);
+	background: color-mix(in srgb, var(--accent) 15%, var(--bg-secondary));
 }
 
 .channel-item.playing {
-	background: linear-gradient(135deg, #9C27B0, #7B1FA2);
-	border-color: #9C27B0;
+	background: var(--accent);
+	border-color: var(--accent);
 }
 
 .channel-item .freq {
 	font-weight: 700;
 	font-size: 18px;
-	color: #0d47a1;
+	color: var(--text-primary);
 	min-width: 70px;
 }
 
@@ -986,11 +988,12 @@ body.theme-glass {
 
 .channel-item .name-input {
 	flex: 1;
-	border: 1px solid #90caf9;
+	border: 1px solid var(--bg-primary);
 	border-radius: 4px;
 	padding: 4px 8px;
 	font-size: 14px;
-	background: rgba(255,255,255,0.8);
+	background: var(--bg-primary);
+	color: var(--text-primary);
 }
 
 .channel-item.playing .name-input {
@@ -1005,7 +1008,7 @@ body.theme-glass {
 
 .channel-item .signal {
 	font-size: 12px;
-	color: #1565C0;
+	color: var(--text-secondary);
 	min-width: 40px;
 	text-align: right;
 }
@@ -1017,7 +1020,7 @@ body.theme-glass {
 .channel-item .remove-btn {
 	width: 24px;
 	height: 24px;
-	background: #f44336;
+	background: var(--danger);
 	color: white;
 	border: none;
 	border-radius: 50%;
@@ -1035,18 +1038,18 @@ body.theme-glass {
 }
 
 .channel-item.disabled {
-	background: linear-gradient(135deg, #e0e0e0, #ccc);
-	border-color: #999;
+	background: var(--bg-primary);
+	border-color: var(--text-secondary);
 	pointer-events: none;
-	opacity: 0.6;
+	opacity: 0.5;
 }
 
 .channel-item.disabled .freq {
-	color: #666;
+	color: var(--text-secondary);
 }
 
 .no-channels {
-	color: #999;
+	color: var(--text-secondary);
 	font-style: italic;
 	font-size: 14px;
 	text-align: center;
@@ -1070,21 +1073,21 @@ body.theme-glass {
 }
 
 .save-btn {
-	background: #4CAF50;
+	background: var(--success);
 	color: white;
 }
 
 .save-btn:hover {
-	background: #45a049;
+	background: color-mix(in srgb, var(--success) 90%, black);
 }
 
 .clear-btn {
-	background: #f44336;
+	background: var(--danger);
 	color: white;
 }
 
 .clear-btn:hover {
-	background: #d32f2f;
+	background: color-mix(in srgb, var(--danger) 90%, black);
 }
 
 /* Manual Tuning */
@@ -1151,13 +1154,14 @@ body.theme-glass {
 	font-weight: bold;
 	border: none;
 	border-radius: 8px;
-	background: linear-gradient(135deg, #607D8B, #546E7A);
-	color: white;
+	background: var(--bg-secondary);
+	color: var(--text-primary);
 	cursor: pointer;
+	transition: background 0.15s ease;
 }
 
 .manual-tuning-wrapper .tune-btn:hover {
-	background: linear-gradient(135deg, #546E7A, #455A64);
+	background: var(--accent);
 }
 
 .manual-tuning-wrapper .freq-input {
@@ -1167,45 +1171,49 @@ body.theme-glass {
 	text-align: center;
 	font-size: 16px;
 	padding: 0 8px;
-	border: 2px solid #ddd;
+	border: 2px solid var(--bg-secondary);
+	background: var(--bg-card);
+	color: var(--text-primary);
 	border-radius: 8px;
 }
 
 .manual-tuning-wrapper .freq-input:focus {
-	border-color: #2196F3;
+	border-color: var(--accent);
 	outline: none;
 }
 
 .manual-tuning-wrapper .enter-btn {
 	height: 44px;
 	padding: 0 12px;
-	background: linear-gradient(135deg, #4CAF50, #45a049);
+	background: var(--success);
 	color: white;
 	border: none;
 	border-radius: 8px;
 	font-size: 14px;
 	font-weight: bold;
 	cursor: pointer;
+	transition: background 0.15s ease;
 }
 
 .manual-tuning-wrapper .enter-btn:hover {
-	background: linear-gradient(135deg, #45a049, #388E3C);
+	background: color-mix(in srgb, var(--success) 90%, black);
 }
 
 .manual-tuning-wrapper .save-text-btn {
 	height: 44px;
 	padding: 0 14px;
-	background: linear-gradient(135deg, #2196F3, #1976D2);
+	background: var(--accent);
 	color: white;
 	border: none;
 	border-radius: 8px;
 	font-size: 14px;
 	font-weight: bold;
 	cursor: pointer;
+	transition: background 0.15s ease;
 }
 
 .manual-tuning-wrapper .save-text-btn:hover {
-	background: linear-gradient(135deg, #1976D2, #1565C0);
+	background: var(--accent-hover);
 }
 
 /* Centered Signal Meter */
@@ -1228,7 +1236,7 @@ body.theme-glass {
 	height: 100%;
 	left: 50%;
 	width: 0%;
-	background: linear-gradient(90deg, #FFEB3B, #8BC34A, #4CAF50);
+	background: linear-gradient(90deg, var(--warning), var(--success));
 	transition: width 0.3s ease;
 	border-radius: 0 16px 16px 0;
 }
@@ -1239,7 +1247,7 @@ body.theme-glass {
 	height: 100%;
 	right: 50%;
 	width: 0%;
-	background: linear-gradient(270deg, #FFEB3B, #8BC34A, #4CAF50);
+	background: linear-gradient(270deg, var(--warning), var(--success));
 	transition: width 0.3s ease;
 	border-radius: 16px 0 0 16px;
 }
@@ -1251,14 +1259,14 @@ body.theme-glass {
 	transform: translate(-50%, -50%);
 	font-size: 14px;
 	font-weight: 700;
-	color: #333;
+	color: var(--text-primary);
 	z-index: 3;
-	text-shadow: 0 0 3px white, 0 0 3px white;
+	text-shadow: 0 0 3px var(--bg-primary), 0 0 3px var(--bg-primary);
 }
 
 .status-text {
 	font-size: 14px;
-	color: #666;
+	color: var(--text-secondary);
 	margin-top: 4px;
 	min-height: 20px;
 }
@@ -1275,14 +1283,14 @@ body.theme-glass {
 
 .header-progress-bar {
 	height: 8px;
-	background: #e0e0e0;
+	background: var(--bg-secondary);
 	border-radius: 4px;
 	overflow: hidden;
 }
 
 .header-progress-bar-fill {
 	height: 100%;
-	background: linear-gradient(90deg, #ff9800, #ffc107);
+	background: var(--warning);
 	transition: width 0.3s ease;
 	border-radius: 4px;
 }
