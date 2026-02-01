@@ -142,8 +142,9 @@ body {
 .signal-value {
 	text-align: right;
 	font-size: 0.75rem;
-	color: var(--text-secondary);
+	color: var(--text-primary);
 	margin-top: 4px;
+	font-weight: 500;
 }
 
 .squelch-control-inline {
@@ -161,11 +162,12 @@ body {
 
 .squelch-info {
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-end;
 	align-items: center;
+	gap: 8px;
 }
 
-.squelch-control-inline label {
+.squelch-control-inline .squelch-label {
 	font-size: 0.875rem;
 	color: var(--text-secondary);
 }

@@ -665,11 +665,19 @@
 			});
 		}
 
-		// Preset buttons
+		// Preset buttons - auto-play and sync when clicked
 		document.querySelectorAll('[data-preset]').forEach(btn => {
 			btn.addEventListener('click', () => {
 				const freq = btn.dataset.preset;
 				setFrequencyHuman(freq);
+				// Auto-play when preset clicked
+				if (elements.audioPlayer && elements.audioPlayer.paused) {
+					elements.audioPlayer.play();
+				}
+				// Auto-sync to live
+				if (elements.audioPlayer) {
+					goLive();
+				}
 			});
 		});
 

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>Flyradio</title>
+	<title>Aviation Radio</title>
 	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-	<a href="index.html" class="back-btn">← Tilbake</a>
+	<a href="index.html" class="back-btn">← Back</a>
 
 	<div class="header">
-		<h1>✈️ Flyradio</h1>
-		<p class="subtitle">Luftfart 118-137 MHz (AM)</p>
+		<h1>✈️ Aviation Radio</h1>
+		<p class="subtitle">Aircraft 118-137 MHz (AM)</p>
 	</div>
 
 	<!-- Frequency Display -->
@@ -31,25 +31,25 @@
 			<input type="range" id="squelch-slider" min="0" max="300" value="0">
 			<div class="squelch-info">
 				<span class="squelch-value" id="squelch-value">0</span>
-				<label>Squelch</label>
+				<span class="squelch-label">Squelch</span>
 			</div>
 		</div>
 	</div>
 
 	<!-- Emergency -->
 	<div class="card" style="border: 2px solid var(--danger);">
-		<div class="card-title" style="color: var(--danger);">🆘 Nødfrekvens</div>
+		<div class="card-title" style="color: var(--danger);">🆘 Emergency</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="121.5M" style="border-color: var(--danger); grid-column: span 2;">
 				<span class="freq" style="font-size: 1.25rem;">121.500 MHz</span>
-				<span class="name">Internasjonal nødfrekvens</span>
+				<span class="name">International Emergency</span>
 			</button>
 		</div>
 	</div>
 
-	<!-- Norwegian Airports -->
+	<!-- Airports - Edit frequencies by changing data-preset and .name -->
 	<div class="card">
-		<div class="card-title">Norske flyplasser</div>
+		<div class="card-title">Airports</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="118.1M">
 				<span class="freq">Oslo APP</span>
@@ -77,13 +77,13 @@
 			</button>
 		</div>
 		<div class="antenna-guide">
-			📶 Antenne: <strong>~55 cm</strong>
+			📶 Antenna: <strong>~55 cm</strong>
 		</div>
 	</div>
 
-	<!-- Common Frequencies -->
+	<!-- Other Frequencies -->
 	<div class="card">
-		<div class="card-title">Andre frekvenser</div>
+		<div class="card-title">Other Frequencies</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="123.45M">
 				<span class="freq">Pilot-Pilot</span>
@@ -106,7 +106,7 @@
 
 	<!-- Manual Tuning -->
 	<div class="card">
-		<div class="card-title">Manuell justering</div>
+		<div class="card-title">Manual Tuning</div>
 		<div class="tuning-controls">
 			<div class="tune-btn-group">
 				<button class="tune-btn" data-tune="-1">-1</button>
@@ -127,17 +127,17 @@
 
 	<!-- Settings -->
 	<div class="card">
-		<div class="card-title">Innstillinger</div>
+		<div class="card-title">⚙️ Settings</div>
 		<div class="settings-row">
 			<div class="setting-group">
-				<label>Modulasjon</label>
+				<label>Modulation</label>
 				<select id="mod-select">
 					<option value="a" selected>AM</option>
 					<option value="f">FM</option>
 				</select>
 			</div>
 			<div class="setting-group">
-				<label>Forsterkning</label>
+				<label>Gain</label>
 				<select id="gain-select">
 					<option value="auto">Auto</option>
 				</select>
@@ -145,25 +145,25 @@
 		</div>
 		<div class="checkbox-group">
 			<input type="checkbox" id="autogain-check" checked>
-			<label for="autogain-check">Automatisk forsterkning</label>
+			<label for="autogain-check">Automatic gain control</label>
 		</div>
 	</div>
 	<div class="card">
-		<div class="card-title">ℹ️ Om Flyradio</div>
+		<div class="card-title">ℹ️ About Aviation Radio</div>
 		<p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
-			Luftfart bruker <strong>AM modulasjon</strong> på 118-137 MHz. 
-			<strong>121.5 MHz</strong> er den internasjonale nødfrekvensen. 
-			Frekvensene kan variere - sjekk oppdaterte AIP Norge for korrekte frekvenser.
+			Aviation uses <strong>AM modulation</strong> on 118-137 MHz. 
+			<strong>121.5 MHz</strong> is the international emergency frequency. 
+			Frequencies may vary - check updated sources for correct frequencies in your area.
 		</p>
 	</div>
 
 	<!-- Audio Player -->
 	<div class="audio-player">
 		<div class="player-controls">
-			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start lytting</button>
-			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Direkte</button>
+			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start Listening</button>
+			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Sync</button>
 		</div>
-		<div class="player-status" id="player-status">Trykk Start for å lytte</div>
+		<div class="player-status" id="player-status">Press Start to listen</div>
 		<audio id="audio-player" preload="none">
 			<source src="/stream.mp3" type="audio/mpeg">
 		</audio>
