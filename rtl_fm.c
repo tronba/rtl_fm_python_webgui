@@ -132,6 +132,7 @@ struct demod_state
 	int      post_downsample;
 	int      output_scale;
 	int      squelch_level, conseq_squelch, squelch_hits, terminate_on_squelch;
+	int      s_level_raw;  /* raw signal level, even when squelched */
 	int      downsample_passes;
 	int      comp_fir_size;
 	int      custom_atan;
@@ -751,6 +752,7 @@ void full_demod(struct demod_state *d)
 	/* power squelch */
 	if (d->squelch_level) {
 		sr = rms(d->lowpassed, d->lp_len, 1);
+		d->s_level_raw = sr;  /* store raw level before zeroing */
 		if (sr < d->squelch_level) {
 			d->squelch_hits++;
 			for (i=0; i<d->lp_len; i++) {
@@ -758,6 +760,9 @@ void full_demod(struct demod_state *d)
 			}
 		} else {
 			d->squelch_hits = 0;}
+	} else {
+		/* no squelch, still update s_level_raw */
+		d->s_level_raw = rms(d->lowpassed, d->lp_len, 1);
 	}
 	d->mode_demod(d);  /* lowpassed -> result */
 	if (d->mode_demod == &raw_demod) {

@@ -304,12 +304,8 @@ uint32_t lib_get_frequency(){
 }
 
 int lib_get_s_level(){
-	int s = rms(demod.lowpassed, demod.lp_len, 1);
-	if (s > 0) {
-		return s;
-	} else {
-		return 0;
-	} 
+	/* return the raw signal level, even when squelched */
+	return demod.s_level_raw;
 }
 
 void  lib_set_frequency(uint32_t new_frequency){
