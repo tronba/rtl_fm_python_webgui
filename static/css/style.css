@@ -143,8 +143,13 @@ body {
 	text-align: right;
 	font-size: 0.75rem;
 	color: var(--text-primary);
-	margin-top: 4px;
-	font-weight: 500;
+	margin-top: 6px;
+	font-weight: 600;
+	padding: 2px 6px;
+	background: var(--bg-secondary);
+	border-radius: 4px;
+	display: inline-block;
+	float: right;
 }
 
 .squelch-control-inline {
