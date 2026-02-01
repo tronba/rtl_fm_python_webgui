@@ -158,7 +158,7 @@ body {
 .squelch-control-inline label {
 	font-size: 0.875rem;
 	color: var(--text-secondary);
-	min-width: 60px;
+	margin-left: auto;
 }
 
 .squelch-control-inline input[type="range"] {

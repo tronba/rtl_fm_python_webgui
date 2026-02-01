@@ -843,7 +843,8 @@
 		// Update squelch threshold overlay on signal meter
 		const squelchThreshold = document.getElementById('squelch-threshold');
 		if (squelchThreshold) {
-			const squelchPercent = Math.min(100, ((state.squelch || 0) / 500) * 100);
+			// Use same scale as signal bar (level / 3) so they align visually
+			const squelchPercent = Math.min(100, ((state.squelch || 0) / 3));
 			squelchThreshold.style.left = squelchPercent + '%';
 		}
 
