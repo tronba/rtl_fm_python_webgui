@@ -20,6 +20,7 @@
 	--btn-secondary-bg: #16213e;
 	--btn-secondary-hover: #1e2d4d;
 	--signal-gradient: linear-gradient(90deg, #22c55e 0%, #84cc16 35%, #f59e0b 65%, #ef4444 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #22c55e 0%, #84cc16 35%, #f59e0b 65%, #ef4444 100%);
 	--card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 	--glow-color: rgba(79, 140, 255, 0.4);
 }
@@ -41,6 +42,7 @@
 	--btn-secondary-bg: #1a1a1a;
 	--btn-secondary-hover: #2a2a2a;
 	--signal-gradient: linear-gradient(90deg, #4ade80 0%, #a3e635 35%, #fbbf24 65%, #f87171 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #4ade80 0%, #a3e635 35%, #fbbf24 65%, #f87171 100%);
 	--card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 	--glow-color: rgba(107, 159, 255, 0.3);
 }
@@ -62,6 +64,7 @@
 	--btn-secondary-bg: #3D3535;
 	--btn-secondary-hover: #524545;
 	--signal-gradient: linear-gradient(90deg, #7CB342 0%, #AED581 35%, #FFB74D 65%, #E57373 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #7CB342 0%, #AED581 35%, #FFB74D 65%, #E57373 100%);
 	--card-shadow: 0 4px 20px rgba(45, 36, 36, 0.5);
 	--glow-color: rgba(224, 123, 57, 0.4);
 }
@@ -83,6 +86,7 @@
 	--btn-secondary-bg: #243B44;
 	--btn-secondary-hover: #2F4D58;
 	--signal-gradient: linear-gradient(90deg, #4DB6AC 0%, #81C784 35%, #FFD54F 65%, #FF8A65 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #4DB6AC 0%, #81C784 35%, #FFD54F 65%, #FF8A65 100%);
 	--card-shadow: 0 4px 20px rgba(26, 47, 54, 0.5);
 	--glow-color: rgba(77, 182, 172, 0.4);
 }
@@ -104,6 +108,7 @@
 	--btn-secondary-bg: #352F44;
 	--btn-secondary-hover: #443D56;
 	--signal-gradient: linear-gradient(90deg, #A5D6A7 0%, #C5E1A5 35%, #FFCC80 65%, #EF9A9A 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #A5D6A7 0%, #C5E1A5 35%, #FFCC80 65%, #EF9A9A 100%);
 	--card-shadow: 0 4px 20px rgba(42, 36, 56, 0.5);
 	--glow-color: rgba(179, 157, 219, 0.4);
 }
@@ -125,6 +130,7 @@
 	--btn-secondary-bg: #2A3530;
 	--btn-secondary-hover: #3A4840;
 	--signal-gradient: linear-gradient(90deg, #66BB6A 0%, #9CCC65 35%, #FFE082 65%, #FFAB91 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #66BB6A 0%, #9CCC65 35%, #FFE082 65%, #FFAB91 100%);
 	--card-shadow: 0 4px 20px rgba(30, 39, 33, 0.5);
 	--glow-color: rgba(129, 199, 132, 0.4);
 }
@@ -146,6 +152,7 @@
 	--btn-secondary-bg: #EFE9E1;
 	--btn-secondary-hover: #E5DED4;
 	--signal-gradient: linear-gradient(90deg, #689F63 0%, #8BC34A 35%, #D4A254 65%, #C75050 100%);
+	--signal-gradient-reverse: linear-gradient(270deg, #689F63 0%, #8BC34A 35%, #D4A254 65%, #C75050 100%);
 	--card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 	--glow-color: rgba(139, 111, 71, 0.3);
 }
@@ -1626,7 +1633,7 @@ body.theme-glass {
 	height: 100%;
 	right: 50%;
 	width: 0%;
-	background: var(--signal-gradient);
+	background: var(--signal-gradient-reverse);
 	transition: width 0.3s ease;
 	border-radius: 16px 0 0 16px;
 }
