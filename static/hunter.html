@@ -3,15 +3,15 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>PMR446 Walkie-Talkie</title>
+	<title>Hunter Radio</title>
 	<link rel="stylesheet" href="css/style.css">
 </head>
 <body data-squelch-attack="100" data-squelch-hang="300" data-squelch-hysteresis="15">
 	<a href="index.html" class="back-btn">← Back</a>
 
 	<div class="header">
-		<h1>📞 PMR446</h1>
-		<p class="subtitle">Walkie-Talkie Channels</p>
+		<h1>🦌 Hunter Radio</h1>
+		<p class="subtitle">138-144 MHz (NFM)</p>
 	</div>
 
 	<!-- Frequency Display -->
@@ -36,77 +36,52 @@
 		</div>
 	</div>
 
-	<!-- PMR446 Channels -->
+	<!-- Hunter Channels -->
 	<div class="card">
-		<div class="card-title">PMR446 Channels (License-free)</div>
+		<div class="card-title">Hunter Channels (License-free)</div>
 		<div class="presets-grid">
-			<button class="preset-btn" data-preset="446.00625M">
+			<button class="preset-btn" data-preset="143.900M">
 				<span class="freq">Channel 1</span>
-				<span class="name">446.00625</span>
+				<span class="name">143.900</span>
 			</button>
-			<button class="preset-btn" data-preset="446.01875M">
+			<button class="preset-btn" data-preset="139.400M">
 				<span class="freq">Channel 2</span>
-				<span class="name">446.01875</span>
+				<span class="name">139.400</span>
 			</button>
-			<button class="preset-btn" data-preset="446.03125M">
+			<button class="preset-btn" data-preset="143.350M">
 				<span class="freq">Channel 3</span>
-				<span class="name">446.03125</span>
+				<span class="name">143.350</span>
 			</button>
-			<button class="preset-btn" data-preset="446.04375M">
+			<button class="preset-btn" data-preset="138.850M">
 				<span class="freq">Channel 4</span>
-				<span class="name">446.04375</span>
+				<span class="name">138.850</span>
 			</button>
-			<button class="preset-btn" data-preset="446.05625M">
+			<button class="preset-btn" data-preset="143.250M">
 				<span class="freq">Channel 5</span>
-				<span class="name">446.05625</span>
+				<span class="name">143.250</span>
 			</button>
-			<button class="preset-btn" data-preset="446.06875M">
+			<button class="preset-btn" data-preset="138.750M">
 				<span class="freq">Channel 6</span>
-				<span class="name">446.06875</span>
+				<span class="name">138.750</span>
 			</button>
-			<button class="preset-btn" data-preset="446.08125M">
-				<span class="freq">Channel 7</span>
-				<span class="name">446.08125</span>
+		</div>
+	</div>
+
+	<!-- Gathering Channels -->
+	<div class="card">
+		<div class="card-title">Gathering Channels</div>
+		<div class="presets-grid">
+			<button class="preset-btn" data-preset="143.125M">
+				<span class="freq">Gather 1</span>
+				<span class="name">143.125</span>
 			</button>
-			<button class="preset-btn" data-preset="446.09375M">
-				<span class="freq">Channel 8</span>
-				<span class="name">446.09375</span>
-			</button>
-			<button class="preset-btn" data-preset="446.10625M">
-				<span class="freq">Channel 9</span>
-				<span class="name">446.10625</span>
-			</button>
-			<button class="preset-btn" data-preset="446.11875M">
-				<span class="freq">Channel 10</span>
-				<span class="name">446.11875</span>
-			</button>
-			<button class="preset-btn" data-preset="446.12500M">
-				<span class="freq">Channel 11</span>
-				<span class="name">446.12500</span>
-			</button>
-			<button class="preset-btn" data-preset="446.13125M">
-				<span class="freq">Channel 12</span>
-				<span class="name">446.13125</span>
-			</button>
-			<button class="preset-btn" data-preset="446.13750M">
-				<span class="freq">Channel 13</span>
-				<span class="name">446.13750</span>
-			</button>
-			<button class="preset-btn" data-preset="446.14375M">
-				<span class="freq">Channel 14</span>
-				<span class="name">446.14375</span>
-			</button>
-			<button class="preset-btn" data-preset="446.15000M">
-				<span class="freq">Channel 15</span>
-				<span class="name">446.15000</span>
-			</button>
-			<button class="preset-btn" data-preset="446.16250M">
-				<span class="freq">Channel 16</span>
-				<span class="name">446.16250</span>
+			<button class="preset-btn" data-preset="138.625M">
+				<span class="freq">Gather 2</span>
+				<span class="name">138.625</span>
 			</button>
 		</div>
 		<div class="antenna-guide">
-			📶 Antenna: <strong>~16 cm</strong>
+			📶 Antenna: <strong>~105 cm</strong>
 		</div>
 	</div>
 
@@ -124,7 +99,7 @@
 			</div>
 		</div>
 		<div class="freq-input-group">
-			<input type="text" class="freq-input" id="freq-input" placeholder="E.g. 446.05M">
+			<input type="text" class="freq-input" id="freq-input" placeholder="E.g. 143.9M">
 			<button class="set-btn" id="set-freq-btn">Set</button>
 		</div>
 	</div>
@@ -151,23 +126,6 @@
 			<input type="checkbox" id="autogain-check" checked>
 			<label for="autogain-check">Automatic gain control</label>
 		</div>
-		<div class="squelch-group">
-			<label>Squelch (demper støy når ingen sender)</label>
-			<div class="squelch-control">
-				<input type="range" id="squelch-slider" min="0" max="500" value="0">
-				<span class="squelch-value" id="squelch-value">0</span>
-			</div>
-		</div>
-	</div>
-
-	<!-- Info -->
-	<div class="card">
-		<div class="card-title">ℹ️ Om PMR446</div>
-		<p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
-			PMR446 er lisensfrie walkie-talkie frekvenser som alle kan bruke. 
-			Kanal 1-8 er de vanligste. Med RTL-SDR kan du kun <strong>lytte</strong>, 
-			ikke sende. For å sende trenger du en PMR446 radio.
-		</p>
 	</div>
 
 	<!-- Audio Player -->
