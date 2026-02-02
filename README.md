@@ -1,6 +1,6 @@
 # RTL-SDR Web Radio
 
-A mobile-friendly web interface for RTL-SDR radio reception. Still very much in development, only the FM section is kinda done. Will work on the rest as time permits.
+A mobile-friendly web interface for RTL-SDR radio reception. Listen to the radio from your phone while the RTL-SDR runs on a server (Raspberry Pi, old laptop, etc). Audio streams over the network as MP3 - no need to be physically near the dongle.
 
 ## Why This Fork?
 
@@ -8,18 +8,21 @@ I needed a radio interface that non-technical family members could use during em
 
 My goal was to create something where someone can just tap "Marine Radio" → "Channel 16" and start listening, without needing to know that Channel 16 is 156.800 MHz or that marine VHF uses FM modulation.
 
-Each radio mode (FM, Marine, Aviation, PMR446) is a separate HTML page with its own presets and appropriate defaults. This isn't elegant from a code perspective, but it means each page can be tailored for its specific use case - and a confused user can't accidentally switch from marine emergency monitoring to FM music.
+Each radio mode (FM, Marine, Aviation, PMR446, Hunter/Gather) is a separate HTML page with its own presets and appropriate defaults. This isn't elegant from a code perspective, but it means each page can be tailored for its specific use case - and a confused user can't accidentally switch from marine emergency monitoring to FM music.
 
-![Radio Modes](https://img.shields.io/badge/Modes-FM%20|%20Marine%20|%20Air%20|%20PMR446-blue)
+![Radio Modes](https://img.shields.io/badge/Modes-FM%20|%20Marine%20|%20Air%20|%20PMR446%20|%20Hunter-blue)
 ![License](https://img.shields.io/badge/License-GPLv2-green)
 
 ## Features
 
-- **📱 Mobile-optimized UI** - Touch-friendly controls, works great on phones
-- **🎯 Purpose-built radio modes** - Separate pages for FM, Marine VHF, Aviation, PMR446
+- **📱 Mobile-optimized UI** - Touch-friendly controls, compact layout designed for phones
+- **🎯 Purpose-built radio modes** - Separate pages for FM, Marine VHF, Aviation, PMR446, Hunter/Gather
 - **🔍 FM Sweep Scanner** - Human-assisted station discovery with automatic fine-tuning
 - **💾 Channel memory** - Save and organize stations in browser localStorage
+- **🔊 CTCSS tone squelch** - Filter walkie-talkie channels by sub-audible tone (Hunter radio)
+- **⚡ Advanced squelch** - Attack delay, hang time, and hysteresis for cleaner audio
 - **🔌 Offline capable** - No external JavaScript dependencies, runs on local network
+- **🌐 Remote listening** - Server runs on one device, listen from anywhere on your network
 
 ## Radio Modes
 
@@ -45,6 +48,26 @@ See [FM Sweep Scanner Documentation](docs/FM_SWEEP_SCANNER.md) for details.
 ### 📞 PMR446 (446 MHz)
 - All 16 PMR446 walkie-talkie channels
 - License-free monitoring
+
+### 🦌 Hunter/Gather Radio (138-144 MHz)
+- Norwegian hunter radio channels (analog FM only)
+- 6 hunting channels + 2 gathering channels preset
+- **CTCSS tone squelch** - Filter by sub-audible tone (67.0-250.3 Hz)
+- Narrowband FM optimized for voice communication
+
+**Note:** Digital DMR channels are not supported - this mode only works with analog FM transmissions.
+
+## Advanced Squelch
+
+All radio pages include advanced squelch features (hidden in the HTML for simplicity):
+- **Attack delay** - Signal must be above threshold for X ms before opening
+- **Hang time** - Keep squelch open for X ms after signal drops
+- **Hysteresis** - Different thresholds for opening vs closing
+
+Default values are tuned per radio type. To customize, edit the `data-squelch-*` attributes in the `<body>` tag of each HTML file:
+```html
+<body data-squelch-attack="100" data-squelch-hang="300" data-squelch-hysteresis="15">
+```
 
 ## Screenshots
 
@@ -91,7 +114,7 @@ pip install -r requirements.txt
 
 ## Running
 
-Start the web server:
+Start the web server (on the device with the RTL-SDR dongle):
 
 ```bash
 ./start_web_stream.sh
@@ -105,15 +128,17 @@ Or manually:
 
 Open in browser: **http://localhost:10100/**
 
-For remote access (e.g., from phone on same network):
+**For remote listening** (the whole point!) - find your server's IP and connect from your phone/tablet:
 
 ```bash
-# Find your IP
+# On the server, find your IP
 hostname -I
 
-# Access from phone
-http://YOUR_IP:10100/
+# On your phone's browser
+http://YOUR_SERVER_IP:10100/
 ```
+
+Example: RTL-SDR plugged into a Raspberry Pi at `192.168.1.50`, access from your phone at `http://192.168.1.50:10100/`
 
 ## REST API
 
@@ -127,6 +152,8 @@ The original REST API is fully preserved:
 | `/gain/human/28` | Set gain in dB |
 | `/gain/auto` | Enable auto gain |
 | `/gain/list` | List available gain values |
+| `/squelch/<level>` | Set squelch level (0-300) |
+| `/ctcss/<freq>` | Set CTCSS tone filter (67.0-250.3 Hz, 0=off) |
 | `/stream.mp3` | Live audio stream |
 
 ## Project Structure
@@ -135,25 +162,28 @@ The original REST API is fully preserved:
 ├── rtl_fm_python_web.py    # Flask web server with audio streaming
 ├── rtl_fm_python_thread.py # RTL-SDR control thread
 ├── rtl_fm_python_common.py # Shared utilities
-├── rtl_fm.c                # Modified rtl_fm source
+├── rtl_fm.c                # Modified rtl_fm source (CTCSS + advanced squelch)
 ├── static/
 │   ├── index.html          # Mode selection home page
 │   ├── fm.html             # FM radio with sweep scanner
 │   ├── marine.html         # Marine VHF channels
 │   ├── air.html            # Aviation frequencies
 │   ├── pmr446.html         # PMR446 channels
+│   ├── hunter.html         # Hunter/gather radio with CTCSS
 │   ├── css/style.css       # Shared styles
-│   └── js/radio.js         # Shared JavaScript (legacy)
+│   └── js/radio.js         # Shared JavaScript
 └── docs/
     └── FM_SWEEP_SCANNER.md # Sweep scanner documentation
 ```
 
 ## Technical Notes
 
-- Audio is streamed as MP3 via FFmpeg (32kHz → 128kbps MP3)
-- State polling every 500ms for signal meter
-- No WebSocket - simple REST polling for maximum compatibility
-- Channels stored in browser localStorage
+- **Audio streaming**: Raw audio from rtl_fm → FFmpeg → MP3 (32kHz/128kbps) → Network
+- **Silent frame injection**: Keeps MP3 stream alive during squelch (no reconnect spam)
+- **State polling**: Every 500ms for signal meter updates
+- **No WebSocket**: Simple REST polling for maximum compatibility
+- **Channel storage**: Browser localStorage (no server-side database)
+- **CTCSS detection**: Goertzel algorithm running on demodulated audio (~125ms blocks)
 
 ## Credits & License
 
