@@ -133,6 +133,13 @@ struct demod_state
 	int      output_scale;
 	int      squelch_level, conseq_squelch, squelch_hits, terminate_on_squelch;
 	int      s_level_raw;  /* raw signal level, even when squelched */
+	/* Advanced squelch parameters */
+	int      squelch_attack_ms;    /* signal must be above threshold for this long to open */
+	int      squelch_hang_ms;      /* keep open for this long after signal drops */
+	int      squelch_hysteresis;   /* close threshold = level - hysteresis */
+	int      squelch_open;         /* current squelch state: 0=closed, 1=open */
+	int      squelch_attack_count; /* cycles above threshold */
+	int      squelch_hang_count;   /* cycles since signal dropped */
 	int      downsample_passes;
 	int      comp_fir_size;
 	int      custom_atan;
@@ -749,17 +756,64 @@ void full_demod(struct demod_state *d)
 	} else {
 		low_pass(d);
 	}
-	/* power squelch */
+	/* power squelch with attack delay, hang time, and hysteresis */
 	if (d->squelch_level) {
+		int open_threshold = d->squelch_level;
+		int close_threshold = d->squelch_level - d->squelch_hysteresis;
+		/* Convert ms to processing cycles (roughly 20-30ms per cycle at default rates) */
+		int ms_per_cycle = 25;  /* approximate ms per full_demod call */
+		int attack_cycles = d->squelch_attack_ms / ms_per_cycle;
+		int hang_cycles = d->squelch_hang_ms / ms_per_cycle;
+		int should_mute;
+		
 		sr = rms(d->lowpassed, d->lp_len, 1);
 		d->s_level_raw = sr;  /* store raw level before zeroing */
-		if (sr < d->squelch_level) {
-			d->squelch_hits++;
+		
+		if (d->squelch_open) {
+			/* Squelch is currently open */
+			if (sr >= close_threshold) {
+				/* Signal still good, reset hang counter */
+				d->squelch_hang_count = 0;
+				d->squelch_hits = 0;
+			} else {
+				/* Signal dropped below close threshold */
+				d->squelch_hang_count++;
+				d->squelch_hits++;
+				if (hang_cycles > 0 && d->squelch_hang_count < hang_cycles) {
+					/* Still in hang time, keep open */
+				} else {
+					/* Hang time expired, close squelch */
+					d->squelch_open = 0;
+					d->squelch_attack_count = 0;
+				}
+			}
+		} else {
+			/* Squelch is currently closed */
+			if (sr >= open_threshold) {
+				/* Signal above open threshold */
+				d->squelch_attack_count++;
+				if (attack_cycles > 0 && d->squelch_attack_count < attack_cycles) {
+					/* Not yet met attack time, stay closed */
+				} else {
+					/* Attack time met, open squelch */
+					d->squelch_open = 1;
+					d->squelch_hang_count = 0;
+					d->squelch_hits = 0;
+				}
+			} else {
+				/* Signal below threshold, reset attack counter */
+				d->squelch_attack_count = 0;
+				d->squelch_hits++;
+			}
+		}
+		
+		/* Mute audio if squelch is closed */
+		should_mute = !d->squelch_open;
+		if (should_mute) {
 			for (i=0; i<d->lp_len; i++) {
 				d->lowpassed[i] = 0;
 			}
-		} else {
-			d->squelch_hits = 0;}
+		}
 	} else {
 		/* no squelch, still update s_level_raw */
 		d->s_level_raw = rms(d->lowpassed, d->lp_len, 1);
@@ -962,6 +1016,13 @@ void demod_init(struct demod_state *s)
 	s->conseq_squelch = 10;
 	s->terminate_on_squelch = 0;
 	s->squelch_hits = 11;
+	/* Advanced squelch defaults */
+	s->squelch_attack_ms = 0;     /* disabled by default */
+	s->squelch_hang_ms = 0;       /* disabled by default */
+	s->squelch_hysteresis = 0;    /* disabled by default */
+	s->squelch_open = 0;
+	s->squelch_attack_count = 0;
+	s->squelch_hang_count = 0;
 	s->downsample_passes = 0;
 	s->comp_fir_size = 0;
 	s->prev_index = 0;

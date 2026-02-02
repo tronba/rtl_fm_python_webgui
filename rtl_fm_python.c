@@ -322,6 +322,36 @@ int lib_get_squelch_level() {
 	return demod.squelch_level;
 }
 
+/* Advanced squelch setters */
+void lib_set_squelch_attack_ms(int ms) {
+	demod.squelch_attack_ms = ms;
+}
+
+void lib_set_squelch_hang_ms(int ms) {
+	demod.squelch_hang_ms = ms;
+}
+
+void lib_set_squelch_hysteresis(int h) {
+	demod.squelch_hysteresis = h;
+}
+
+/* Advanced squelch getters */
+int lib_get_squelch_attack_ms() {
+	return demod.squelch_attack_ms;
+}
+
+int lib_get_squelch_hang_ms() {
+	return demod.squelch_hang_ms;
+}
+
+int lib_get_squelch_hysteresis() {
+	return demod.squelch_hysteresis;
+}
+
+int lib_get_squelch_open() {
+	return demod.squelch_open;
+}
+
 void  util_set_wbfm_options(){
 	controller.wb_mode = 1;
 	demod.custom_atan = 1;

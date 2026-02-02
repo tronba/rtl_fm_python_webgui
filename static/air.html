@@ -32,8 +32,32 @@
 			<div class="squelch-info">
 				<span class="squelch-label">Squelch</span>
 				<span class="squelch-value" id="squelch-value">0</span>
+				<span class="squelch-indicator" id="squelch-indicator"></span>
 			</div>
 		</div>
+	</div>
+
+	<!-- Advanced Squelch Settings -->
+	<div class="card">
+		<div class="card-title">⚙️ Advanced Squelch</div>
+		<div class="advanced-squelch-grid">
+			<div class="squelch-setting">
+				<label>Attack Delay</label>
+				<input type="range" id="squelch-attack-slider" min="0" max="1000" step="50" value="0">
+				<span class="squelch-setting-value" id="squelch-attack-value">0ms</span>
+			</div>
+			<div class="squelch-setting">
+				<label>Hang Time</label>
+				<input type="range" id="squelch-hang-slider" min="0" max="2000" step="100" value="0">
+				<span class="squelch-setting-value" id="squelch-hang-value">0ms</span>
+			</div>
+			<div class="squelch-setting">
+				<label>Hysteresis</label>
+				<input type="range" id="squelch-hysteresis-slider" min="0" max="100" step="5" value="0">
+				<span class="squelch-setting-value" id="squelch-hysteresis-value">0</span>
+			</div>
+		</div>
+		<p class="squelch-help">Attack filters noise spikes. Hang prevents choppy audio. Hysteresis prevents rapid on/off.</p>
 	</div>
 
 	<!-- Emergency -->

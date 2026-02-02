@@ -14,7 +14,11 @@
 		mod: 'w',
 		gain: 0,
 		autogain: true,
-		squelch: 0
+		squelch: 0,
+		squelch_attack_ms: 0,
+		squelch_hang_ms: 0,
+		squelch_hysteresis: 0,
+		squelch_open: 0
 	};
 	let gains = [];
 	let pollInterval = null;
@@ -41,6 +45,14 @@
 			audioPlayer: document.getElementById('audio-player'),
 			squelchSlider: document.getElementById('squelch-slider'),
 			squelchValue: document.getElementById('squelch-value'),
+			// Advanced squelch elements
+			squelchAttackSlider: document.getElementById('squelch-attack-slider'),
+			squelchAttackValue: document.getElementById('squelch-attack-value'),
+			squelchHangSlider: document.getElementById('squelch-hang-slider'),
+			squelchHangValue: document.getElementById('squelch-hang-value'),
+			squelchHysteresisSlider: document.getElementById('squelch-hysteresis-slider'),
+			squelchHysteresisValue: document.getElementById('squelch-hysteresis-value'),
+			squelchIndicator: document.getElementById('squelch-indicator'),
 			// Player elements
 			playBtn: document.getElementById('player-btn-play'),
 			liveBtn: document.getElementById('player-btn-live'),
@@ -693,6 +705,40 @@
 				setSquelch(parseInt(elements.squelchSlider.value));
 			});
 		}
+
+		// Advanced squelch sliders
+		if (elements.squelchAttackSlider) {
+			elements.squelchAttackSlider.addEventListener('input', () => {
+				if (elements.squelchAttackValue) {
+					elements.squelchAttackValue.textContent = elements.squelchAttackSlider.value + 'ms';
+				}
+			});
+			elements.squelchAttackSlider.addEventListener('change', () => {
+				setSquelchAttack(parseInt(elements.squelchAttackSlider.value));
+			});
+		}
+
+		if (elements.squelchHangSlider) {
+			elements.squelchHangSlider.addEventListener('input', () => {
+				if (elements.squelchHangValue) {
+					elements.squelchHangValue.textContent = elements.squelchHangSlider.value + 'ms';
+				}
+			});
+			elements.squelchHangSlider.addEventListener('change', () => {
+				setSquelchHang(parseInt(elements.squelchHangSlider.value));
+			});
+		}
+
+		if (elements.squelchHysteresisSlider) {
+			elements.squelchHysteresisSlider.addEventListener('input', () => {
+				if (elements.squelchHysteresisValue) {
+					elements.squelchHysteresisValue.textContent = elements.squelchHysteresisSlider.value;
+				}
+			});
+			elements.squelchHysteresisSlider.addEventListener('change', () => {
+				setSquelchHysteresis(parseInt(elements.squelchHysteresisSlider.value));
+			});
+		}
 	}
 
 	// Normalize FM page-specific elements to the shared element keys
@@ -800,6 +846,36 @@
 			.catch(err => console.error('Failed to set squelch:', err));
 	}
 
+	function setSquelchAttack(ms) {
+		fetch('/squelch/attack/' + ms)
+			.then(res => res.json())
+			.then(data => {
+				state = data;
+				updateUI();
+			})
+			.catch(err => console.error('Failed to set squelch attack:', err));
+	}
+
+	function setSquelchHang(ms) {
+		fetch('/squelch/hang/' + ms)
+			.then(res => res.json())
+			.then(data => {
+				state = data;
+				updateUI();
+			})
+			.catch(err => console.error('Failed to set squelch hang:', err));
+	}
+
+	function setSquelchHysteresis(level) {
+		fetch('/squelch/hysteresis/' + level)
+			.then(res => res.json())
+			.then(data => {
+				state = data;
+				updateUI();
+			})
+			.catch(err => console.error('Failed to set squelch hysteresis:', err));
+	}
+
 	// UI Update Functions
 	function updateUI() {
 		// Update frequency display
@@ -846,6 +922,33 @@
 		}
 		if (elements.squelchValue) {
 			elements.squelchValue.textContent = state.squelch || 0;
+		}
+
+		// Update advanced squelch sliders (only if not being dragged)
+		if (elements.squelchAttackSlider && document.activeElement !== elements.squelchAttackSlider) {
+			elements.squelchAttackSlider.value = state.squelch_attack_ms || 0;
+		}
+		if (elements.squelchAttackValue) {
+			elements.squelchAttackValue.textContent = (state.squelch_attack_ms || 0) + 'ms';
+		}
+
+		if (elements.squelchHangSlider && document.activeElement !== elements.squelchHangSlider) {
+			elements.squelchHangSlider.value = state.squelch_hang_ms || 0;
+		}
+		if (elements.squelchHangValue) {
+			elements.squelchHangValue.textContent = (state.squelch_hang_ms || 0) + 'ms';
+		}
+
+		if (elements.squelchHysteresisSlider && document.activeElement !== elements.squelchHysteresisSlider) {
+			elements.squelchHysteresisSlider.value = state.squelch_hysteresis || 0;
+		}
+		if (elements.squelchHysteresisValue) {
+			elements.squelchHysteresisValue.textContent = state.squelch_hysteresis || 0;
+		}
+
+		// Update squelch open indicator
+		if (elements.squelchIndicator) {
+			elements.squelchIndicator.classList.toggle('open', state.squelch_open === 1);
 		}
 
 		// Update squelch threshold overlay on signal meter

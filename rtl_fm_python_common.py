@@ -55,6 +55,15 @@ get_squelch 	= fm.lib_get_squelch_level
 get_demod	= lambda 	: chr(fm.lib_get_demod_mode())
 str_to_freq	= lambda  f : fm.lib_frequency_convert(f.encode('utf-8'))
 
+# Advanced squelch functions
+set_squelch_attack_ms   = lambda ms : fm.lib_set_squelch_attack_ms(ctypes.c_int(ms))
+set_squelch_hang_ms     = lambda ms : fm.lib_set_squelch_hang_ms(ctypes.c_int(ms))
+set_squelch_hysteresis  = lambda h  : fm.lib_set_squelch_hysteresis(ctypes.c_int(h))
+get_squelch_attack_ms   = fm.lib_get_squelch_attack_ms
+get_squelch_hang_ms     = fm.lib_get_squelch_hang_ms
+get_squelch_hysteresis  = fm.lib_get_squelch_hysteresis
+get_squelch_open        = fm.lib_get_squelch_open
+
 def process_args(l):
 	c=len(l)+1
 	argc=ctypes.c_int(c)

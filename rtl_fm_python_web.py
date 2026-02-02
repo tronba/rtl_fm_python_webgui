@@ -21,7 +21,11 @@
 
 from flask import Flask, jsonify, url_for, redirect, Response, request
 from rtl_fm_python_thread import *
-from rtl_fm_python_common import set_audio_output, get_squelch, set_squelch
+from rtl_fm_python_common import (set_audio_output, get_squelch, set_squelch,
+	get_squelch_attack_ms, set_squelch_attack_ms,
+	get_squelch_hang_ms, set_squelch_hang_ms,
+	get_squelch_hysteresis, set_squelch_hysteresis,
+	get_squelch_open)
 import subprocess
 import threading
 import queue
@@ -120,7 +124,11 @@ def web_state():
 			'mod'		: get_demod(),
 			'gain'		: get_gain(),
 			'autogain'	: get_auto_gain(),
-			'squelch'	: get_squelch()
+			'squelch'	: get_squelch(),
+			'squelch_attack_ms' : get_squelch_attack_ms(),
+			'squelch_hang_ms'   : get_squelch_hang_ms(),
+			'squelch_hysteresis': get_squelch_hysteresis(),
+			'squelch_open'      : get_squelch_open()
 		})
 
 @app.route('/frequency/<int:f>')
@@ -158,6 +166,21 @@ def web_set_auto_gain():
 @app.route('/squelch/<int:level>')
 def web_set_squelch(level):
 	set_squelch(level)
+	return web_state()
+
+@app.route('/squelch/attack/<int:ms>')
+def web_set_squelch_attack(ms):
+	set_squelch_attack_ms(ms)
+	return web_state()
+
+@app.route('/squelch/hang/<int:ms>')
+def web_set_squelch_hang(ms):
+	set_squelch_hang_ms(ms)
+	return web_state()
+
+@app.route('/squelch/hysteresis/<int:level>')
+def web_set_squelch_hysteresis(level):
+	set_squelch_hysteresis(level)
 	return web_state()
 
 @app.route('/gain/list')
