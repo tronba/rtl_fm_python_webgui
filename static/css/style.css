@@ -143,6 +143,7 @@ body {
 	margin-top: 6px;
 	font-size: 0.875rem;
 	color: var(--text-secondary);
+	text-align: right;
 }
 
 .signal-value span {
@@ -1296,7 +1297,7 @@ body.theme-glass {
 	text-align: center;
 }
 
-.signal-meter {
+.signal-meter-container .signal-meter {
 	position: relative;
 	height: 32px;
 	background: var(--bg-card, #1f2937);
