@@ -5,8 +5,28 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>FM/AM Radio receiver</title>
 	<link rel="stylesheet" href="css/style.css">
+	<script>
+		// Apply saved theme immediately to prevent flash
+		(function() {
+			const savedTheme = localStorage.getItem('radio-theme') || 'original';
+			document.documentElement.setAttribute('data-theme', savedTheme);
+		})();
+	</script>
 </head>
 <body>
+	<!-- Theme Switcher -->
+	<div class="theme-switcher">
+		<select id="theme-select" aria-label="Select theme">
+			<option value="original">🔵 Tech Blue</option>
+			<option value="dark">🌑 Dark Mode</option>
+			<option value="sunset">🌅 Warm Sunset</option>
+			<option value="ocean">🌊 Ocean Breeze</option>
+			<option value="lavender">💜 Soft Lavender</option>
+			<option value="forest">🌲 Earthy Forest</option>
+			<option value="cream">☕ Cream & Coffee</option>
+		</select>
+	</div>
+
 	<div class="header">
 		<h1>📻 FM/AM Radio receiver</h1>
 		<p class="subtitle">Select radio mode</p>
@@ -53,5 +73,21 @@
 			</div>
 		</a>
 	</div>
+
+	<script>
+		// Theme Switcher Logic
+		const themeSelect = document.getElementById('theme-select');
+		const savedTheme = localStorage.getItem('radio-theme') || 'original';
+		
+		// Set initial value
+		themeSelect.value = savedTheme;
+		
+		// Listen for changes
+		themeSelect.addEventListener('change', function() {
+			const theme = this.value;
+			document.documentElement.setAttribute('data-theme', theme);
+			localStorage.setItem('radio-theme', theme);
+		});
+	</script>
 </body>
 </html>

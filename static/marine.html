@@ -5,8 +5,27 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>Marine VHF</title>
 	<link rel="stylesheet" href="css/style.css">
+	<script>
+		(function() {
+			const savedTheme = localStorage.getItem('radio-theme') || 'original';
+			document.documentElement.setAttribute('data-theme', savedTheme);
+		})();
+	</script>
 </head>
 <body data-squelch-attack="150" data-squelch-hang="500" data-squelch-hysteresis="20">
+	<!-- Theme Switcher -->
+	<div class="theme-switcher">
+		<select id="theme-select" aria-label="Select theme">
+			<option value="original">🔵 Tech Blue</option>
+			<option value="dark">🌑 Dark Mode</option>
+			<option value="sunset">🌅 Warm Sunset</option>
+			<option value="ocean">🌊 Ocean Breeze</option>
+			<option value="lavender">💜 Soft Lavender</option>
+			<option value="forest">🌲 Earthy Forest</option>
+			<option value="cream">☕ Cream & Coffee</option>
+		</select>
+	</div>
+
 	<a href="index.html" class="back-btn">← Back</a>
 
 	<div class="header">
@@ -144,6 +163,14 @@
 		</audio>
 	</div>
 
+	<script>
+		const themeSelect = document.getElementById('theme-select');
+		themeSelect.value = localStorage.getItem('radio-theme') || 'original';
+		themeSelect.addEventListener('change', function() {
+			document.documentElement.setAttribute('data-theme', this.value);
+			localStorage.setItem('radio-theme', this.value);
+		});
+	</script>
 	<script src="js/radio.js"></script>
 </body>
 </html>
