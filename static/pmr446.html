@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -7,11 +7,11 @@
 	<link rel="stylesheet" href="css/style.css">
 </head>
 <body data-squelch-attack="100" data-squelch-hang="300" data-squelch-hysteresis="15">
-	<a href="index.html" class="back-btn">← Tilbake</a>
+	<a href="index.html" class="back-btn">← Back</a>
 
 	<div class="header">
 		<h1>📞 PMR446</h1>
-		<p class="subtitle">Walkie-Talkie kanaler</p>
+		<p class="subtitle">Walkie-Talkie Channels</p>
 	</div>
 
 	<!-- Frequency Display -->
@@ -36,51 +36,51 @@
 		</div>
 	</div>
 
-	<!-- PMR446 Kanaler -->
+	<!-- PMR446 Channels -->
 	<div class="card">
-		<div class="card-title">PMR446 Kanaler (Lisensfri)</div>
+		<div class="card-title">PMR446 Channels (License-free)</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="446.00625M">
-				<span class="freq">Kanal 1</span>
+				<span class="freq">Channel 1</span>
 				<span class="name">446.00625</span>
 			</button>
 			<button class="preset-btn" data-preset="446.01875M">
-				<span class="freq">Kanal 2</span>
+				<span class="freq">Channel 2</span>
 				<span class="name">446.01875</span>
 			</button>
 			<button class="preset-btn" data-preset="446.03125M">
-				<span class="freq">Kanal 3</span>
+				<span class="freq">Channel 3</span>
 				<span class="name">446.03125</span>
 			</button>
 			<button class="preset-btn" data-preset="446.04375M">
-				<span class="freq">Kanal 4</span>
+				<span class="freq">Channel 4</span>
 				<span class="name">446.04375</span>
 			</button>
 			<button class="preset-btn" data-preset="446.05625M">
-				<span class="freq">Kanal 5</span>
+				<span class="freq">Channel 5</span>
 				<span class="name">446.05625</span>
 			</button>
 			<button class="preset-btn" data-preset="446.06875M">
-				<span class="freq">Kanal 6</span>
+				<span class="freq">Channel 6</span>
 				<span class="name">446.06875</span>
 			</button>
 			<button class="preset-btn" data-preset="446.08125M">
-				<span class="freq">Kanal 7</span>
+				<span class="freq">Channel 7</span>
 				<span class="name">446.08125</span>
 			</button>
 			<button class="preset-btn" data-preset="446.09375M">
-				<span class="freq">Kanal 8</span>
+				<span class="freq">Channel 8</span>
 				<span class="name">446.09375</span>
 			</button>
 		</div>
 		<div class="antenna-guide">
-			📶 Antenne: <strong>~16 cm</strong>
+			📶 Antenna: <strong>~16 cm</strong>
 		</div>
 	</div>
 
 	<!-- Manual Tuning -->
 	<div class="card">
-		<div class="card-title">Manuell justering</div>
+		<div class="card-title">Manual Tuning</div>
 		<div class="tuning-controls">
 			<div class="tune-btn-group">
 				<button class="tune-btn" data-tune="-0.0125">-12.5k</button>
@@ -92,24 +92,24 @@
 			</div>
 		</div>
 		<div class="freq-input-group">
-			<input type="text" class="freq-input" id="freq-input" placeholder="F.eks. 446.05M">
-			<button class="set-btn" id="set-freq-btn">Sett</button>
+			<input type="text" class="freq-input" id="freq-input" placeholder="E.g. 446.05M">
+			<button class="set-btn" id="set-freq-btn">Set</button>
 		</div>
 	</div>
 
 	<!-- Settings -->
 	<div class="card">
-		<div class="card-title">Innstillinger</div>
+		<div class="card-title">Settings</div>
 		<div class="settings-row">
 			<div class="setting-group">
-				<label>Modulasjon</label>
+				<label>Modulation</label>
 				<select id="mod-select">
 					<option value="f" selected>FM (NFM)</option>
 					<option value="w">WBFM</option>
 				</select>
 			</div>
 			<div class="setting-group">
-				<label>Forsterkning</label>
+				<label>Gain</label>
 				<select id="gain-select">
 					<option value="auto">Auto</option>
 				</select>
@@ -117,7 +117,7 @@
 		</div>
 		<div class="checkbox-group">
 			<input type="checkbox" id="autogain-check" checked>
-			<label for="autogain-check">Automatisk forsterkning</label>
+			<label for="autogain-check">Automatic gain control</label>
 		</div>
 		<div class="squelch-group">
 			<label>Squelch (demper støy når ingen sender)</label>
@@ -141,10 +141,10 @@
 	<!-- Audio Player -->
 	<div class="audio-player">
 		<div class="player-controls">
-			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start lytting</button>
-			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Direkte</button>
+			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start Listening</button>
+			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Sync</button>
 		</div>
-		<div class="player-status" id="player-status">Trykk Start for å lytte</div>
+		<div class="player-status" id="player-status">Press Start to listen</div>
 		<audio id="audio-player" preload="none">
 			<source src="/stream.mp3" type="audio/mpeg">
 		</audio>
