@@ -18,7 +18,9 @@
 		squelch_attack_ms: 0,
 		squelch_hang_ms: 0,
 		squelch_hysteresis: 0,
-		squelch_open: 0
+		squelch_open: 0,
+		ctcss_freq: 0,
+		ctcss_detected: 0
 	};
 	let gains = [];
 	let pollInterval = null;
@@ -53,6 +55,8 @@
 			squelchHysteresisSlider: document.getElementById('squelch-hysteresis-slider'),
 			squelchHysteresisValue: document.getElementById('squelch-hysteresis-value'),
 			squelchIndicator: document.getElementById('squelch-indicator'),
+			// CTCSS element
+			ctcssSelect: document.getElementById('ctcss-select'),
 			// Player elements
 			playBtn: document.getElementById('player-btn-play'),
 			liveBtn: document.getElementById('player-btn-live'),
@@ -742,6 +746,14 @@
 				setSquelchHysteresis(parseInt(elements.squelchHysteresisSlider.value));
 			});
 		}
+
+		// CTCSS tone select
+		if (elements.ctcssSelect) {
+			elements.ctcssSelect.addEventListener('change', () => {
+				const freq = parseFloat(elements.ctcssSelect.value) || 0;
+				setCtcss(freq);
+			});
+		}
 	}
 
 	// Normalize FM page-specific elements to the shared element keys
@@ -877,6 +889,17 @@
 				updateUI();
 			})
 			.catch(err => console.error('Failed to set squelch hysteresis:', err));
+	}
+
+	function setCtcss(freq) {
+		const url = freq > 0 ? '/ctcss/' + freq : '/ctcss/off';
+		fetch(url)
+			.then(res => res.json())
+			.then(data => {
+				state = data;
+				updateUI();
+			})
+			.catch(err => console.error('Failed to set CTCSS:', err));
 	}
 
 	// Apply advanced squelch defaults from page data attributes
@@ -1080,6 +1103,7 @@
 		setGain,
 		setAutoGain,
 		setSquelch,
+		setCtcss,
 		togglePlayback,
 		goLive,
 		startScanner,

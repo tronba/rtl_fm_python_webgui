@@ -64,6 +64,13 @@ get_squelch_hang_ms     = fm.lib_get_squelch_hang_ms
 get_squelch_hysteresis  = fm.lib_get_squelch_hysteresis
 get_squelch_open        = fm.lib_get_squelch_open
 
+# CTCSS tone squelch functions
+fm.lib_set_ctcss_freq.argtypes = [ctypes.c_float]
+fm.lib_get_ctcss_freq.restype = ctypes.c_float
+set_ctcss_freq          = lambda freq : fm.lib_set_ctcss_freq(ctypes.c_float(freq))
+get_ctcss_freq          = fm.lib_get_ctcss_freq
+get_ctcss_detected      = fm.lib_get_ctcss_detected
+
 def process_args(l):
 	c=len(l)+1
 	argc=ctypes.c_int(c)

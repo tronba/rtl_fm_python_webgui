@@ -352,6 +352,19 @@ int lib_get_squelch_open() {
 	return demod.squelch_open;
 }
 
+/* CTCSS tone squelch functions */
+void lib_set_ctcss_freq(float freq) {
+	ctcss_setup(&demod, freq);
+}
+
+float lib_get_ctcss_freq() {
+	return demod.ctcss_freq;
+}
+
+int lib_get_ctcss_detected() {
+	return demod.ctcss_detected;
+}
+
 void  util_set_wbfm_options(){
 	controller.wb_mode = 1;
 	demod.custom_atan = 1;

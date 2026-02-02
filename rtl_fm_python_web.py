@@ -25,7 +25,8 @@ from rtl_fm_python_common import (set_audio_output, get_squelch, set_squelch,
 	get_squelch_attack_ms, set_squelch_attack_ms,
 	get_squelch_hang_ms, set_squelch_hang_ms,
 	get_squelch_hysteresis, set_squelch_hysteresis,
-	get_squelch_open)
+	get_squelch_open,
+	set_ctcss_freq, get_ctcss_freq, get_ctcss_detected)
 import subprocess
 import threading
 import queue
@@ -128,7 +129,9 @@ def web_state():
 			'squelch_attack_ms' : get_squelch_attack_ms(),
 			'squelch_hang_ms'   : get_squelch_hang_ms(),
 			'squelch_hysteresis': get_squelch_hysteresis(),
-			'squelch_open'      : get_squelch_open()
+			'squelch_open'      : get_squelch_open(),
+			'ctcss_freq'        : get_ctcss_freq(),
+			'ctcss_detected'    : get_ctcss_detected()
 		})
 
 @app.route('/frequency/<int:f>')
@@ -181,6 +184,16 @@ def web_set_squelch_hang(ms):
 @app.route('/squelch/hysteresis/<int:level>')
 def web_set_squelch_hysteresis(level):
 	set_squelch_hysteresis(level)
+	return web_state()
+
+@app.route('/ctcss/<float:freq>')
+def web_set_ctcss(freq):
+	set_ctcss_freq(freq)
+	return web_state()
+
+@app.route('/ctcss/off')
+def web_set_ctcss_off():
+	set_ctcss_freq(0.0)
 	return web_state()
 
 @app.route('/gain/list')

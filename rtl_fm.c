@@ -140,6 +140,12 @@ struct demod_state
 	int      squelch_open;         /* current squelch state: 0=closed, 1=open */
 	int      squelch_attack_count; /* cycles above threshold */
 	int      squelch_hang_count;   /* cycles since signal dropped */
+	/* CTCSS tone squelch */
+	float    ctcss_freq;           /* CTCSS tone frequency in Hz, 0=disabled */
+	float    ctcss_coeff;          /* Goertzel coefficient for current tone */
+	int      ctcss_n;              /* Goertzel block size */
+	int      ctcss_detected;       /* 1 if CTCSS tone detected */
+	float    ctcss_threshold;      /* detection threshold */
 	int      downsample_passes;
 	int      comp_fir_size;
 	int      custom_atan;
@@ -735,6 +741,80 @@ void arbitrary_resample(int16_t *buf1, int16_t *buf2, int len1, int len2)
 	}
 }
 
+/* CTCSS tone detection using Goertzel algorithm */
+void ctcss_setup(struct demod_state *d, float freq)
+{
+	/* Setup Goertzel for detecting CTCSS tone
+	 * Sample rate for the demodulated audio is rate_out (typically 24000)
+	 * We want enough samples for reliable detection but not too many for latency
+	 * Block size of ~200ms gives good detection while keeping latency reasonable
+	 */
+	d->ctcss_freq = freq;
+	if (freq <= 0.0f) {
+		d->ctcss_coeff = 0.0f;
+		d->ctcss_n = 0;
+		return;
+	}
+	
+	/* Use output sample rate for detection */
+	int sample_rate = d->rate_out > 0 ? d->rate_out : 24000;
+	
+	/* Block size: ~100-200ms for reliable CTCSS detection */
+	d->ctcss_n = sample_rate / 8;  /* ~125ms at 24000 Hz = 3000 samples */
+	
+	/* Goertzel coefficient: 2 * cos(2 * PI * freq / sample_rate) */
+	d->ctcss_coeff = 2.0f * cosf(2.0f * M_PI * freq / (float)sample_rate);
+}
+
+int ctcss_detect(struct demod_state *d, int16_t *samples, int len)
+{
+	/* Goertzel algorithm for single-frequency detection
+	 * Returns 1 if CTCSS tone is detected, 0 otherwise
+	 */
+	if (d->ctcss_freq <= 0.0f || d->ctcss_n <= 0) {
+		return 1;  /* No CTCSS configured, always pass */
+	}
+	
+	/* Use at most ctcss_n samples */
+	int n = (len < d->ctcss_n) ? len : d->ctcss_n;
+	if (n < 100) {
+		return d->ctcss_detected;  /* Not enough samples, keep last state */
+	}
+	
+	float s0, s1 = 0.0f, s2 = 0.0f;
+	float coeff = d->ctcss_coeff;
+	int i;
+	
+	/* Run Goertzel on the audio samples */
+	for (i = 0; i < n; i++) {
+		s0 = (float)samples[i] / 32768.0f + coeff * s1 - s2;
+		s2 = s1;
+		s1 = s0;
+	}
+	
+	/* Calculate magnitude squared */
+	float magnitude_sq = s1 * s1 + s2 * s2 - coeff * s1 * s2;
+	
+	/* Normalize by block size squared and scale */
+	float power = magnitude_sq / (float)(n * n);
+	
+	/* Calculate total signal power for comparison */
+	float total_power = 0.0f;
+	for (i = 0; i < n; i++) {
+		float sample = (float)samples[i] / 32768.0f;
+		total_power += sample * sample;
+	}
+	total_power /= (float)n;
+	
+	/* CTCSS tone is detected if its relative power exceeds threshold */
+	/* The tone should be a significant portion of the sub-300Hz content */
+	float relative_power = (total_power > 0.00001f) ? (power / total_power) : 0.0f;
+	
+	d->ctcss_detected = (relative_power > d->ctcss_threshold) ? 1 : 0;
+	
+	return d->ctcss_detected;
+}
+
 void full_demod(struct demod_state *d)
 {
 	int i, ds_p;
@@ -821,6 +901,20 @@ void full_demod(struct demod_state *d)
 	d->mode_demod(d);  /* lowpassed -> result */
 	if (d->mode_demod == &raw_demod) {
 		return;
+	}
+	/* CTCSS tone squelch - check after demodulation */
+	if (d->ctcss_freq > 0.0f && d->squelch_open) {
+		/* Only check CTCSS when squelch is already open (signal present) */
+		int ctcss_ok = ctcss_detect(d, d->result, d->result_len);
+		if (!ctcss_ok) {
+			/* CTCSS tone not detected, mute audio but keep squelch state */
+			/* This allows the signal strength squelch to work normally */
+			/* while CTCSS filters which signals we actually hear */
+			int i;
+			for (i = 0; i < d->result_len; i++) {
+				d->result[i] = 0;
+			}
+		}
 	}
 	/* todo, fm noise squelch */
 	// use nicer filter here too?
@@ -1023,6 +1117,12 @@ void demod_init(struct demod_state *s)
 	s->squelch_open = 0;
 	s->squelch_attack_count = 0;
 	s->squelch_hang_count = 0;
+	/* CTCSS defaults */
+	s->ctcss_freq = 0.0f;         /* disabled by default */
+	s->ctcss_coeff = 0.0f;
+	s->ctcss_n = 0;
+	s->ctcss_detected = 0;
+	s->ctcss_threshold = 0.1f;    /* detection threshold */
 	s->downsample_passes = 0;
 	s->comp_fir_size = 0;
 	s->prev_index = 0;
