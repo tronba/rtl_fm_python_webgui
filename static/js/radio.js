@@ -1049,26 +1049,13 @@
 		}
 	}
 
-	// Theme helpers - allows previewing without HTML changes
+	// Theme helpers - DISABLED: now using CSS data-theme system in HTML
 	function setTheme(theme) {
-		// normalize
-		theme = String(theme || 'glass');
-		// remove existing theme classes
-		document.body.classList.remove('theme-glass');
-		if (theme === 'glass') {
-			document.body.classList.add('theme-glass');
-		}
-		try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
-		updateThemeIndicator(theme);
+		// Old theme system disabled - themes now controlled via HTML theme-select dropdown
 	}
 
 	function applyThemeFromStorage() {
-		try {
-			const allowed = ['glass'];
-			let theme = localStorage.getItem('theme');
-			if (!allowed.includes(theme)) theme = 'glass';
-			setTheme(theme);
-		} catch (e) { /* ignore */ }
+		// Old theme system disabled - themes now controlled via HTML theme-select dropdown
 	}
 
 	function updateThemeIndicator(theme) {
