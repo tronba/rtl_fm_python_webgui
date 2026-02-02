@@ -278,6 +278,8 @@ body {
 .signal-bar {
 	height: 100%;
 	background: var(--signal-gradient);
+	background-size: 200% 100%;
+	background-position: left;
 	border-radius: 6px;
 	transition: width 0.2s ease;
 	box-shadow: 0 0 8px var(--glow-color);
@@ -1623,6 +1625,8 @@ body.theme-glass {
 	left: 50%;
 	width: 0%;
 	background: var(--signal-gradient);
+	background-size: 200% 100%;
+	background-position: left;
 	transition: width 0.3s ease;
 	border-radius: 0 16px 16px 0;
 }
@@ -1634,6 +1638,8 @@ body.theme-glass {
 	right: 50%;
 	width: 0%;
 	background: var(--signal-gradient-reverse);
+	background-size: 200% 100%;
+	background-position: right;
 	transition: width 0.3s ease;
 	border-radius: 16px 0 0 16px;
 }
