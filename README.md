@@ -114,6 +114,8 @@ pip install -r requirements.txt
 
 ## Running
 
+### Quick Start (Manual)
+
 Start the web server (on the device with the RTL-SDR dongle):
 
 ```bash
@@ -127,6 +129,53 @@ Or manually:
 ```
 
 Open in browser: **http://localhost:10100/**
+
+### Running as a Service (Recommended)
+
+For proper start/stop control and automatic restart on failure, install as a systemd service:
+
+#### 1. Edit the service file for your setup
+
+Before installing, edit `rtl-fm-radio.service` to match your system:
+- Change `User=pi` and `Group=pi` to your username
+- Change `WorkingDirectory` to your install location
+
+```bash
+nano rtl-fm-radio.service
+```
+
+#### 2. Install the service
+
+```bash
+chmod +x radio-control.sh
+./radio-control.sh install
+```
+
+#### 3. Control the service
+
+```bash
+./radio-control.sh start     # Start the radio server
+./radio-control.sh stop      # Stop the radio server
+./radio-control.sh restart   # Restart the server
+./radio-control.sh status    # Check if running
+./radio-control.sh log       # View live logs
+```
+
+#### 4. Auto-start on boot (Optional)
+
+If you want the radio server to start automatically when the system boots:
+
+```bash
+sudo systemctl enable rtl-fm-radio
+```
+
+To disable auto-start:
+
+```bash
+sudo systemctl disable rtl-fm-radio
+```
+
+**Note:** Auto-start is opt-in. The service will not start on boot unless you explicitly enable it.
 
 **For remote listening** (the whole point!) - find your server's IP and connect from your phone/tablet:
 
