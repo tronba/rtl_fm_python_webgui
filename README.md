@@ -175,8 +175,6 @@ To disable auto-start:
 sudo systemctl disable rtl-fm-radio
 ```
 
-**Note:** Auto-start is opt-in. The service will not start on boot unless you explicitly enable it.
-
 **For remote listening** (the whole point!) - find your server's IP and connect from your phone/tablet:
 
 ```bash
