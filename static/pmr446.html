@@ -6,7 +6,7 @@
 	<title>PMR446 Walkie-Talkie</title>
 	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-squelch-attack="100" data-squelch-hang="300" data-squelch-hysteresis="15">
 	<a href="index.html" class="back-btn">← Tilbake</a>
 
 	<div class="header">
@@ -32,35 +32,11 @@
 			<div class="squelch-info">
 				<span class="squelch-label">Squelch</span>
 				<span class="squelch-value" id="squelch-value">0</span>
-				<span class="squelch-indicator" id="squelch-indicator"></span>
 			</div>
 		</div>
 	</div>
 
-	<!-- Advanced Squelch Settings -->
-	<div class="card">
-		<div class="card-title">⚙️ Avansert Squelch</div>
-		<div class="advanced-squelch-grid">
-			<div class="squelch-setting">
-				<label>Attack Forsinkelse</label>
-				<input type="range" id="squelch-attack-slider" min="0" max="1000" step="50" value="0">
-				<span class="squelch-setting-value" id="squelch-attack-value">0ms</span>
-			</div>
-			<div class="squelch-setting">
-				<label>Hang Tid</label>
-				<input type="range" id="squelch-hang-slider" min="0" max="2000" step="100" value="0">
-				<span class="squelch-setting-value" id="squelch-hang-value">0ms</span>
-			</div>
-			<div class="squelch-setting">
-				<label>Hysterese</label>
-				<input type="range" id="squelch-hysteresis-slider" min="0" max="100" step="5" value="0">
-				<span class="squelch-setting-value" id="squelch-hysteresis-value">0</span>
-			</div>
-		</div>
-		<p class="squelch-help">Attack filtrerer støy. Hang forhindrer hakkete lyd. Hysterese forhindrer rask av/på.</p>
-	</div>
-
-	<!-- PMR446 Channels -->
+	<!-- PMR446 Kanaler -->
 	<div class="card">
 		<div class="card-title">PMR446 Kanaler (Lisensfri)</div>
 		<div class="presets-grid">

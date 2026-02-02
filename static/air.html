@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>Aviation Radio</title>
+	<title>Flyradio</title>
 	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-	<a href="index.html" class="back-btn">← Back</a>
+<body data-squelch-attack="250" data-squelch-hang="400" data-squelch-hysteresis="15">
+	<a href="index.html" class="back-btn">← Tilbake</a>
 
 	<div class="header">
-		<h1>✈️ Aviation Radio</h1>
-		<p class="subtitle">Aircraft 118-137 MHz (AM)</p>
+		<h1>✈️ Flyradio</h1>
+		<p class="subtitle">Luftfart 118-137 MHz (AM)</p>
 	</div>
 
-	<!-- Frequency Display -->
+	<!-- Frekvensvisning -->
 	<div class="card frequency-display">
 		<div>
 			<span class="frequency-value" id="freq-display">---</span>
@@ -32,48 +32,24 @@
 			<div class="squelch-info">
 				<span class="squelch-label">Squelch</span>
 				<span class="squelch-value" id="squelch-value">0</span>
-				<span class="squelch-indicator" id="squelch-indicator"></span>
 			</div>
 		</div>
 	</div>
 
-	<!-- Advanced Squelch Settings -->
-	<div class="card">
-		<div class="card-title">⚙️ Advanced Squelch</div>
-		<div class="advanced-squelch-grid">
-			<div class="squelch-setting">
-				<label>Attack Delay</label>
-				<input type="range" id="squelch-attack-slider" min="0" max="1000" step="50" value="0">
-				<span class="squelch-setting-value" id="squelch-attack-value">0ms</span>
-			</div>
-			<div class="squelch-setting">
-				<label>Hang Time</label>
-				<input type="range" id="squelch-hang-slider" min="0" max="2000" step="100" value="0">
-				<span class="squelch-setting-value" id="squelch-hang-value">0ms</span>
-			</div>
-			<div class="squelch-setting">
-				<label>Hysteresis</label>
-				<input type="range" id="squelch-hysteresis-slider" min="0" max="100" step="5" value="0">
-				<span class="squelch-setting-value" id="squelch-hysteresis-value">0</span>
-			</div>
-		</div>
-		<p class="squelch-help">Attack filters noise spikes. Hang prevents choppy audio. Hysteresis prevents rapid on/off.</p>
-	</div>
-
-	<!-- Emergency -->
+	<!-- Nød -->
 	<div class="card" style="border: 2px solid var(--danger);">
-		<div class="card-title" style="color: var(--danger);">🆘 Emergency</div>
+		<div class="card-title" style="color: var(--danger);">🆘 Nødfrekvens</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="121.5M" style="border-color: var(--danger); grid-column: span 2;">
 				<span class="freq" style="font-size: 1.25rem;">121.500 MHz</span>
-				<span class="name">International Emergency</span>
+				<span class="name">Internasjonal Nødfrekvens</span>
 			</button>
 		</div>
 	</div>
 
-	<!-- Airports - Edit frequencies by changing data-preset and .name -->
+	<!-- Flyplasser -->
 	<div class="card">
-		<div class="card-title">Airports</div>
+		<div class="card-title">Flyplasser</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="118.1M">
 				<span class="freq">Oslo/Trondheim</span>
@@ -97,13 +73,13 @@
 			</button>
 		</div>
 		<div class="antenna-guide">
-			📶 Antenna: <strong>~55 cm</strong>
+			📶 Antenne: <strong>~55 cm</strong>
 		</div>
 	</div>
 
-	<!-- Other Frequencies -->
+	<!-- Andre Frekvenser -->
 	<div class="card">
-		<div class="card-title">Other Frequencies</div>
+		<div class="card-title">Andre Frekvenser</div>
 		<div class="presets-grid">
 			<button class="preset-btn" data-preset="123.45M">
 				<span class="freq">Pilot-Pilot</span>
@@ -124,9 +100,9 @@
 		</div>
 	</div>
 
-	<!-- Manual Tuning -->
+	<!-- Manuell Justering -->
 	<div class="card">
-		<div class="card-title">Manual Tuning</div>
+		<div class="card-title">Manuell Justering</div>
 		<div class="tuning-controls">
 			<div class="tune-btn-group">
 				<button class="tune-btn" data-tune="-1">-1</button>
@@ -145,19 +121,19 @@
 		</div>
 	</div>
 
-	<!-- Settings -->
+	<!-- Innstillinger -->
 	<div class="card">
-		<div class="card-title">⚙️ Settings</div>
+		<div class="card-title">⚙️ Innstillinger</div>
 		<div class="settings-row">
 			<div class="setting-group">
-				<label>Modulation</label>
+				<label>Modulasjon</label>
 				<select id="mod-select">
 					<option value="a" selected>AM</option>
 					<option value="f">FM</option>
 				</select>
 			</div>
 			<div class="setting-group">
-				<label>Gain</label>
+				<label>Forsterkning</label>
 				<select id="gain-select">
 					<option value="auto">Auto</option>
 				</select>
@@ -165,25 +141,25 @@
 		</div>
 		<div class="checkbox-group">
 			<input type="checkbox" id="autogain-check" checked>
-			<label for="autogain-check">Automatic gain control</label>
+			<label for="autogain-check">Automatisk forsterkning</label>
 		</div>
 	</div>
 	<div class="card">
-		<div class="card-title">ℹ️ About Aviation Radio</div>
+		<div class="card-title">ℹ️ Om Flyradio</div>
 		<p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
-			Aviation uses <strong>AM modulation</strong> on 118-137 MHz. 
-			<strong>121.5 MHz</strong> is the international emergency frequency. 
-			Frequencies may vary - check updated sources for correct frequencies in your area.
+			Luftfart bruker <strong>AM-modulasjon</strong> på 118-137 MHz. 
+			<strong>121.5 MHz</strong> er den internasjonale nødfrekvensen. 
+			Frekvenser kan variere - sjekk oppdaterte kilder for korrekte frekvenser i ditt område.
 		</p>
 	</div>
 
-	<!-- Audio Player -->
+	<!-- Lydspiller -->
 	<div class="audio-player">
 		<div class="player-controls">
-			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start Listening</button>
-			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Sync</button>
+			<button class="player-btn player-btn-play" id="player-btn-play">▶️ Start Lytting</button>
+			<button class="player-btn player-btn-live" id="player-btn-live"><span class="live-dot"></span> Synk</button>
 		</div>
-		<div class="player-status" id="player-status">Press Start to listen</div>
+		<div class="player-status" id="player-status">Trykk Start for å lytte</div>
 		<audio id="audio-player" preload="none">
 			<source src="/stream.mp3" type="audio/mpeg">
 		</audio>

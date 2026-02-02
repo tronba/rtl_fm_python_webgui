@@ -76,6 +76,9 @@
 		fetchGainList();
 		fetchState();
 
+		// Apply advanced squelch defaults from page data attributes
+		applyAdvancedSquelchDefaults();
+
 		// Start polling
 		pollInterval = setInterval(fetchState, 500);
 
@@ -874,6 +877,18 @@
 				updateUI();
 			})
 			.catch(err => console.error('Failed to set squelch hysteresis:', err));
+	}
+
+	// Apply advanced squelch defaults from page data attributes
+	function applyAdvancedSquelchDefaults() {
+		const body = document.body;
+		const attack = body.dataset.squelchAttack;
+		const hang = body.dataset.squelchHang;
+		const hysteresis = body.dataset.squelchHysteresis;
+		
+		if (attack) setSquelchAttack(parseInt(attack));
+		if (hang) setSquelchHang(parseInt(hang));
+		if (hysteresis) setSquelchHysteresis(parseInt(hysteresis));
 	}
 
 	// UI Update Functions
