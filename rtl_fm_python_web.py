@@ -96,7 +96,7 @@ def start_audio_stream():
 	def ffmpeg_reader():
 		try:
 			while True:
-				chunk = ffmpeg_process.stdout.read1(1024)
+				chunk = ffmpeg_process.stdout.read(1024)
 				if not chunk:
 					break
 				update_stream_stats(
@@ -114,8 +114,8 @@ def start_audio_stream():
 						update_stream_stats(queue_drops=1)
 					except:
 						pass
-		except:
-			pass
+		except Exception as exc:
+			print(f"FFmpeg reader stopped: {exc}", file=sys.stderr)
 	
 	reader_thread = threading.Thread(target=ffmpeg_reader, daemon=True)
 	reader_thread.start()

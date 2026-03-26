@@ -45,12 +45,17 @@ This fork simplifies radio use for non-technical users during emergencies. Built
 
 ## Installation
 
-1. Install dependencies:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/tronba/rtl_fm_python_webgui.git
+   cd rtl_fm_python_webgui
+   ```
+2. Install dependencies:
    ```bash
    sudo apt-get install rtl-sdr librtlsdr-dev ffmpeg
    pip install -r requirements.txt
    ```
-2. Compile rtl_fm:
+3. Compile rtl_fm:
    ```bash
    ./build.sh
    ```
