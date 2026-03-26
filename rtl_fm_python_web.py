@@ -31,24 +31,12 @@ import subprocess
 import threading
 import queue
 import time
-import os
-import select
 
 # Audio streaming setup
 audio_queue = queue.Queue(maxsize=256)
 ffmpeg_process = None
-pcm_pipe_read_fd = None
-pcm_pipe_write_stream = None
-PCM_SAMPLE_RATE = 32000
-PCM_BYTES_PER_SAMPLE = 2
-PCM_KEEPALIVE_INTERVAL_S = 0.1
-PCM_SILENCE_CHUNK = b'\x00' * int(PCM_SAMPLE_RATE * PCM_BYTES_PER_SAMPLE * PCM_KEEPALIVE_INTERVAL_S)
 stream_stats_lock = threading.Lock()
 stream_stats = {
-	'pcm_bytes': 0,
-	'pcm_silence_bytes': 0,
-	'pcm_silence_writes': 0,
-	'pcm_pipe_timeouts': 0,
 	'ffmpeg_chunks': 0,
 	'ffmpeg_bytes': 0,
 	'queue_drops': 0,
@@ -78,7 +66,7 @@ def get_stream_stats_snapshot():
 
 def start_audio_stream():
 	"""Start FFmpeg process to convert raw audio to MP3"""
-	global ffmpeg_process, pcm_pipe_read_fd, pcm_pipe_write_stream
+	global ffmpeg_process
 	# Start FFmpeg to convert raw S16_LE PCM to MP3
 	# Input: 32kHz, 16-bit signed little-endian, mono
 	# Output: MP3 stream
@@ -103,10 +91,6 @@ def start_audio_stream():
 		print("ERROR: FFmpeg not found. Please install it:", file=sys.stderr)
 		print("  sudo apt-get install ffmpeg", file=sys.stderr)
 		sys.exit(1)
-
-	pcm_pipe_read_fd, pcm_pipe_write_fd = os.pipe()
-	os.set_blocking(pcm_pipe_read_fd, False)
-	pcm_pipe_write_stream = os.fdopen(pcm_pipe_write_fd, 'wb', buffering=0)
 	
 	# Thread to read from FFmpeg and put in queue
 	def ffmpeg_reader():
@@ -133,42 +117,11 @@ def start_audio_stream():
 		except Exception as exc:
 			print(f"FFmpeg reader stopped: {exc}", file=sys.stderr)
 
-	def pcm_feeder():
-		try:
-			while True:
-				ready, _, _ = select.select([pcm_pipe_read_fd], [], [], PCM_KEEPALIVE_INTERVAL_S)
-				if ready:
-					pcm_chunk = os.read(pcm_pipe_read_fd, 65536)
-					if not pcm_chunk:
-						break
-					ffmpeg_process.stdin.write(pcm_chunk)
-					update_stream_stats(pcm_bytes=len(pcm_chunk))
-					continue
-
-				update_stream_stats(
-					pcm_pipe_timeouts=1,
-					pcm_silence_writes=1,
-					pcm_silence_bytes=len(PCM_SILENCE_CHUNK),
-				)
-				ffmpeg_process.stdin.write(PCM_SILENCE_CHUNK)
-		except BrokenPipeError:
-			pass
-		except Exception as exc:
-			print(f"PCM feeder stopped: {exc}", file=sys.stderr)
-		finally:
-			try:
-				os.close(pcm_pipe_read_fd)
-			except OSError:
-				pass
-	
-	feeder_thread = threading.Thread(target=pcm_feeder, daemon=True)
-	feeder_thread.start()
-
 	reader_thread = threading.Thread(target=ffmpeg_reader, daemon=True)
 	reader_thread.start()
 	
-	# Redirect rtl_fm PCM output into a pipe so we can inject silence before FFmpeg.
-	set_audio_output(pcm_pipe_write_stream)
+	# Redirect rtl_fm PCM output directly to FFmpeg.
+	set_audio_output(ffmpeg_process.stdin)
 
 # Start audio streaming before RTL_FM thread
 start_audio_stream()
@@ -199,10 +152,6 @@ def web_state():
 			'ctcss_freq'        : get_ctcss_freq(),
 			'ctcss_detected'    : get_ctcss_detected(),
 			'audio_queue_size'  : audio_queue.qsize(),
-			'audio_pcm_bytes'   : stream_snapshot['pcm_bytes'],
-			'audio_pcm_silence_bytes': stream_snapshot['pcm_silence_bytes'],
-			'audio_pcm_silence_writes': stream_snapshot['pcm_silence_writes'],
-			'audio_pcm_pipe_timeouts': stream_snapshot['pcm_pipe_timeouts'],
 			'audio_ffmpeg_alive': ffmpeg_process is not None and ffmpeg_process.poll() is None,
 			'audio_ffmpeg_chunks': stream_snapshot['ffmpeg_chunks'],
 			'audio_ffmpeg_bytes': stream_snapshot['ffmpeg_bytes'],
