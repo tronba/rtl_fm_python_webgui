@@ -27,6 +27,7 @@
 	let sweepHistory = [];    // Last N frequencies for latency compensation
 	let currentPlayingFreq = null;
 	let channelsDisabled = false;  // Gray out channels during sweep/finetune
+	let freqInputEditing = false;
 
 	// DOM Elements
 	let elements = {};
@@ -590,8 +591,15 @@
 
 		// Frequency input - enter key or blur
 		if (elements.freqInput) {
+			elements.freqInput.addEventListener('focus', () => {
+				freqInputEditing = true;
+			});
+			elements.freqInput.addEventListener('blur', () => {
+				freqInputEditing = false;
+			});
 			elements.freqInput.addEventListener('keypress', (e) => {
 				if (e.key === 'Enter') {
+					e.preventDefault();
 					setFrequencyFromInput();
 				}
 			});
@@ -599,7 +607,8 @@
 		
 		// Go button for frequency input
 		if (elements.freqEnterBtn) {
-			elements.freqEnterBtn.addEventListener('click', () => {
+			elements.freqEnterBtn.addEventListener('click', (e) => {
+				e.preventDefault();
 				setFrequencyFromInput();
 			});
 		}
@@ -677,6 +686,7 @@
 			val = val.toUpperCase().replace('MHZ', '').replace('M', '').trim();
 			const num = parseFloat(val);
 			if (!isNaN(num) && num >= 87.5 && num <= 108) {
+				freqInputEditing = false;
 				setFrequencyHuman(num.toFixed(1) + 'M');
 				elements.freqInput.value = '';
 				elements.freqInput.placeholder = num.toFixed(1) + ' MHz';
@@ -725,8 +735,8 @@
 			}
 			elements.freqDisplay.textContent = displayFreq;
 			
-			// Also update the frequency input field
-			if (elements.freqInput && displayFreq !== '---') {
+			// Do not overwrite the manual input while the user is typing.
+			if (elements.freqInput && displayFreq !== '---' && !freqInputEditing) {
 				elements.freqInput.value = displayFreq;
 			}
 		}

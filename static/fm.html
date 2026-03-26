@@ -63,14 +63,14 @@
 		
 		<div class="sweep-controls">
 			<div class="sweep-btn-row">
-				<button class="sweep-btn sweep-btn-start" id="sweep-start-btn">▶️ Start Sweep</button>
-				<button class="sweep-btn sweep-btn-mark" id="sweep-mark-btn" disabled>⭐ Mark</button>
+				<button type="button" class="sweep-btn sweep-btn-start" id="sweep-start-btn">▶️ Start Sweep</button>
+				<button type="button" class="sweep-btn sweep-btn-mark" id="sweep-mark-btn" disabled>⭐ Mark</button>
 			</div>
 			
 			<div class="speed-btn-group">
-				<button class="speed-btn" data-speed="1500">Slow</button>
-				<button class="speed-btn active" data-speed="600">Fast</button>
-				<button class="speed-btn" data-speed="300">Turbo</button>
+				<button type="button" class="speed-btn" data-speed="1500">Slow</button>
+				<button type="button" class="speed-btn active" data-speed="600">Fast</button>
+				<button type="button" class="speed-btn" data-speed="300">Turbo</button>
 			</div>
 		</div>
 	</div>
@@ -82,7 +82,7 @@
 			<div class="no-channels">No channels saved yet. Run a sweep to find stations!</div>
 		</div>
 		<div class="channel-actions" id="channel-actions" style="display: none;">
-			<button class="clear-btn" id="clear-channels-btn">🗑️ Clear All</button>
+			<button type="button" class="clear-btn" id="clear-channels-btn">🗑️ Clear All</button>
 		</div>
 	</div>
 
@@ -92,19 +92,19 @@
 		<div class="manual-tuning-wrapper">
 			<div class="input-group">
 				<input type="text" class="freq-input" id="freq-input" placeholder="99.5">
-				<button class="enter-btn" id="freq-enter-btn">Go</button>
-				<button class="save-text-btn" id="manual-save-btn">Save</button>
+				<button type="button" class="enter-btn" id="freq-enter-btn">Go</button>
+				<button type="button" class="save-text-btn" id="manual-save-btn">Save</button>
 			</div>
 			<div class="tune-buttons-row">
 				<div class="tune-left">
-					<button class="tune-btn" data-tune="-1">−1</button>
-					<button class="tune-btn" data-tune="-0.5">−.5</button>
-					<button class="tune-btn" data-tune="-0.1">−.1</button>
+					<button type="button" class="tune-btn" data-tune="-1">−1</button>
+					<button type="button" class="tune-btn" data-tune="-0.5">−.5</button>
+					<button type="button" class="tune-btn" data-tune="-0.1">−.1</button>
 				</div>
 				<div class="tune-right">
-					<button class="tune-btn" data-tune="0.1">+.1</button>
-					<button class="tune-btn" data-tune="0.5">+.5</button>
-					<button class="tune-btn" data-tune="1">+1</button>
+					<button type="button" class="tune-btn" data-tune="0.1">+.1</button>
+					<button type="button" class="tune-btn" data-tune="0.5">+.5</button>
+					<button type="button" class="tune-btn" data-tune="1">+1</button>
 				</div>
 			</div>
 		</div>
