@@ -30,33 +30,39 @@ from rtl_fm_python_common import (set_audio_output, get_squelch, set_squelch,
 import subprocess
 import threading
 import queue
+import time
 
 # Audio streaming setup
-audio_queue = queue.Queue(maxsize=100)
+audio_queue = queue.Queue(maxsize=256)
 ffmpeg_process = None
+stream_stats_lock = threading.Lock()
+stream_stats = {
+	'ffmpeg_chunks': 0,
+	'ffmpeg_bytes': 0,
+	'queue_drops': 0,
+	'queue_underruns': 0,
+	'active_clients': 0,
+	'last_chunk_monotonic': None,
+}
 
-# Silent MP3 frame (valid MPEG Audio Layer 3 frame, ~26ms of silence at 128kbps)
-# This keeps the stream alive when squelch is active
-SILENT_MP3_FRAME = bytes([
-	0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x49, 0x6E, 0x66, 0x6F,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-])
+
+def update_stream_stats(**kwargs):
+	with stream_stats_lock:
+		for key, value in kwargs.items():
+			if key == 'last_chunk_monotonic':
+				stream_stats[key] = value
+			else:
+				stream_stats[key] += value
+
+
+def get_stream_stats_snapshot():
+	with stream_stats_lock:
+		snapshot = dict(stream_stats)
+	last_chunk_monotonic = snapshot['last_chunk_monotonic']
+	snapshot['ms_since_audio_chunk'] = None
+	if last_chunk_monotonic is not None:
+		snapshot['ms_since_audio_chunk'] = int((time.monotonic() - last_chunk_monotonic) * 1000)
+	return snapshot
 
 def start_audio_stream():
 	"""Start FFmpeg process to convert raw audio to MP3"""
@@ -67,14 +73,20 @@ def start_audio_stream():
 	try:
 		ffmpeg_process = subprocess.Popen([
 			'ffmpeg',
+			'-nostdin',
+			'-loglevel', 'error',
 			'-f', 's16le',           # Input format
 			'-ar', '32000',          # Sample rate
 			'-ac', '1',              # Mono
+			'-fflags', '+nobuffer',
 			'-i', 'pipe:0',          # Read from stdin
+			'-flush_packets', '1',
+			'-write_xing', '0',
 			'-f', 'mp3',             # Output format
+			'-c:a', 'libmp3lame',
 			'-b:a', '128k',          # Bitrate
 			'-',                     # Output to stdout
-		], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+		], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0)
 	except FileNotFoundError:
 		print("ERROR: FFmpeg not found. Please install it:", file=sys.stderr)
 		print("  sudo apt-get install ffmpeg", file=sys.stderr)
@@ -84,9 +96,14 @@ def start_audio_stream():
 	def ffmpeg_reader():
 		try:
 			while True:
-				chunk = ffmpeg_process.stdout.read(4096)
+				chunk = ffmpeg_process.stdout.read1(1024)
 				if not chunk:
 					break
+				update_stream_stats(
+					ffmpeg_chunks=1,
+					ffmpeg_bytes=len(chunk),
+					last_chunk_monotonic=time.monotonic(),
+				)
 				try:
 					audio_queue.put(chunk, block=False)
 				except queue.Full:
@@ -94,6 +111,7 @@ def start_audio_stream():
 					try:
 						audio_queue.get_nowait()
 						audio_queue.put(chunk, block=False)
+						update_stream_stats(queue_drops=1)
 					except:
 						pass
 		except:
@@ -117,6 +135,7 @@ def web_root():
 
 @app.route('/state')
 def web_state():
+	stream_snapshot = get_stream_stats_snapshot()
 	return jsonify(
 		{
 			's_level'	: get_s_level(),
@@ -131,7 +150,15 @@ def web_state():
 			'squelch_hysteresis': get_squelch_hysteresis(),
 			'squelch_open'      : get_squelch_open(),
 			'ctcss_freq'        : get_ctcss_freq(),
-			'ctcss_detected'    : get_ctcss_detected()
+			'ctcss_detected'    : get_ctcss_detected(),
+			'audio_queue_size'  : audio_queue.qsize(),
+			'audio_ffmpeg_alive': ffmpeg_process is not None and ffmpeg_process.poll() is None,
+			'audio_ffmpeg_chunks': stream_snapshot['ffmpeg_chunks'],
+			'audio_ffmpeg_bytes': stream_snapshot['ffmpeg_bytes'],
+			'audio_queue_drops' : stream_snapshot['queue_drops'],
+			'audio_queue_underruns': stream_snapshot['queue_underruns'],
+			'audio_active_clients': stream_snapshot['active_clients'],
+			'audio_ms_since_chunk': stream_snapshot['ms_since_audio_chunk']
 		})
 
 @app.route('/frequency/<int:f>')
@@ -217,14 +244,19 @@ def web_scan_fm():
 def stream_audio():
 	"""Stream MP3 audio to browser"""
 	def generate():
-		while True:
-			try:
-				# Short timeout - if no audio, send silence to keep stream alive
-				chunk = audio_queue.get(timeout=0.1)
+		update_stream_stats(active_clients=1)
+		try:
+			while True:
+				try:
+					chunk = audio_queue.get(timeout=1.0)
+				except queue.Empty:
+					update_stream_stats(queue_underruns=1)
+					if ffmpeg_process is not None and ffmpeg_process.poll() is not None:
+						break
+					continue
 				yield chunk
-			except queue.Empty:
-				# Send silent frame to keep connection alive (squelch active)
-				yield SILENT_MP3_FRAME
+		finally:
+			update_stream_stats(active_clients=-1)
 	
 	response = Response(generate(), mimetype='audio/mpeg')
 	response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
